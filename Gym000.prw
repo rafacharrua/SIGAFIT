@@ -1,3 +1,2 @@
 User function EspNome()
-Return "SIGAFIT"
-//
+Return "Gestão de academia - SIGAFIT"
