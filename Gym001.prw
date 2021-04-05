@@ -85,7 +85,7 @@ user function CALTERA(cAlias,nReg,nOpc)
         EndIf 
 return Nil
 /*-------------------------------------------
-==========Função CDeleta - Inclusão==========
+==========Função CDeleta - Exclusão==========
 --------------------------------------------*/
 user function CDELETA(cAlias,nReg,nOpc)
     Local nOpcao := 0
