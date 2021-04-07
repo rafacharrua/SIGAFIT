@@ -8,7 +8,7 @@ Private aObjects := {}
 Private aPosObj :={}
 Private aInfo := {}
 
-nOpcx:=3
+nOp:=3
 
 aSize := MsAdvSize()
 AAdd( aObjects, { 70, 20,  .T., .T. })
@@ -58,7 +58,7 @@ While !Eof() .And. (x3_arquivo == "ZZC")
     
         nUsado:=nUsado+1        
         
-            IF nOpcx == 3           
+            IF nOp == 3           
                 IF x3_tipo == "C"             
                     aCOLS[1][nUsado] := SPACE(x3_tamanho)                
                 Elseif x3_tipo == "N"                    
@@ -102,9 +102,9 @@ cTitulo:="Avaliação Física"
 
 aC:={}
 //#IFDEF WINDOWS 
-    AADD(aC,{"cCliente" ,{15,10} ,"Cod. do Cliente","@!",'ExecBlock(.F.,.F.)',"SA1",}) 
-    AADD(aC,{"cLoja"    ,{15,200},"Loja","@!",,,}) 
-    AADD(aC,{"dData"    ,{27,10} ,"Data de Emissao",,,,})
+    AADD(aC,{"cCliente" ,{15,10} ,"Cod. do Cliente","@!",'ExecBlock(.F.,.F.)',"SA1",.T.}) 
+    AADD(aC,{"cLoja"    ,{15,200},"Loja","@!",,,.T.}) 
+    AADD(aC,{"dData"    ,{27,10} ,"Data de Emissao",,,,.T.})
 //#ELSE 
 //    AADD(aC,{"cCliente" ,{6,5} ,"Cod. do Cliente","@!",'ExecBlock("MD2VLCLI",.F.,.F.)',"SA1",}) 
 //    AADD(aC,{"cLoja"    ,{6,40},"Loja","@!",,,}) 
@@ -152,6 +152,6 @@ cTudoOk  := IIF(Findfunction("Md2TudOk"),"ExecBlock('Md2TudOk',.f.,.f.)","")
 // lRet = .f. se cancelou
 
 //lRet:=Modelo2(cTitulo,aC,aR,aCGD,nOpcx,cLinhaOk,cTudoOk)
-lRet:=Modelo2(cTitulo,aC,aR,aCGD,nOpcx,cLinhaOk,cTudoOk,,,,,,,.T.)
+lRet:=Modelo2(cTitulo,aC,aR,aCGD,nOp,cLinhaOk,cTudoOk,,,,,,,.T.)
 //lRet:=Modelo2(cTitulo,aC,aR,aCGD,nOpcx,cLinhaOk,cTudoOk,,,,,aSize,,,.T.)
 Return
