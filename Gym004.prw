@@ -7,8 +7,7 @@ Private aSize := {}
 Private aObjects := {}
 Private aPosObj :={}
 Private aInfo := {}
-
-nOp:=3
+Private nOp:=3
 
 aSize := MsAdvSize()
 AAdd( aObjects, { 70, 20,  .T., .T. })
