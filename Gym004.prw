@@ -102,7 +102,7 @@ cTitulo:="Avaliação Física"
 
 aC:={}
 //#IFDEF WINDOWS 
-    AADD(aC,{"cCliente" ,{15,10} ,"Cod. do Cliente","@!",'ExecBlock("MD2VLCLI",.F.,.F.)',"SA1",}) 
+    AADD(aC,{"cCliente" ,{15,10} ,"Cod. do Cliente","@!",'ExecBlock(.F.,.F.)',"SA1",}) 
     AADD(aC,{"cLoja"    ,{15,200},"Loja","@!",,,}) 
     AADD(aC,{"dData"    ,{27,10} ,"Data de Emissao",,,,})
 //#ELSE 
@@ -117,23 +117,25 @@ aC:={}
 
 aR:={}
 
-//#IFDEF WINDOWS 
+#IFDEF WINDOWS 
     AADD(aR,{"nLinGetD" ,{120,10},"Linha na GetDados", "@E 999",,,.F.})
-//#ELSE 
-//    AADD(aR,{"nLinGetD" ,{19,05},"Linha na GetDados","@E 999",,,.F.})
-//#ENDIF
+#ELSE 
+   AADD(aR,{"nLinGetD" ,{19,05},"Linha na GetDados","@E 999",,,.F.})
+#ENDIF
 
 //+------------------------------------------------+
 //¦ Array com coordenadas da GetDados no modelo2   ¦
 //+------------------------------------------------+
 
-//#IFDEF WINDOWS    
-//aCGD:={44,5,118,315}
-//aCGD:={aSize[7],aSize[1],aSize[6],aSize[5]}
-//#ELSE    
-//aCGD:={10,04,15,73}
-//#ENDIF
-aCGD:={5,5,650,1300}
+#IFDEF WINDOWS    
+aCGD:={44,5,118,315}
+CGD:={aSize[7],aSize[1],aSize[6],aSize[5]}
+#ELSE    
+aCGD:={10,04,15,73}
+#ENDIF
+
+
+
 
 //+----------------------------------------------+
 //¦ Validacoes na GetDados da Modelo 2           ¦
