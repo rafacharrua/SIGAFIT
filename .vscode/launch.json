@@ -17,7 +17,12 @@
 			"args": [],
 			"label": "u_Quest",
 			"description": ""
+		},
+		{
+			"args": [],
+			"label": "SIGAMDI",
+			"description": ""
 		}
 	],
-	"lastProgramExecuted": "u_Quest"
+	"lastProgramExecuted": "SIGAMDI"
 }
