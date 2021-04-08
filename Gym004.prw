@@ -7,7 +7,7 @@ Private aSize := {}
 Private aObjects := {}
 Private aPosObj :={}
 Private aInfo := {}
-Private nOp:=3
+Private nOp
 
 aSize := MsAdvSize()
 AAdd( aObjects, { 70, 20,  .T., .T. })
@@ -101,9 +101,9 @@ cTitulo:="Avaliação Física"
 
 aC:={}
 //#IFDEF WINDOWS 
-    AADD(aC,{"cCliente" ,{15,10} ,"Cod. do Cliente","@!",'ExecBlock(.F.,.F.)',"SA1",.T.}) 
-    AADD(aC,{"cLoja"    ,{15,200},"Loja","@!",,,.T.}) 
-    AADD(aC,{"dData"    ,{27,10} ,"Data de Emissao",,,,.T.})
+    AADD(aC,{"cCliente" ,{15,10} ,"Cod. do Cliente","@!",'ExecBlock(.F.,.F.)',"SA1",}) 
+    AADD(aC,{"cLoja"    ,{15,200},"Loja","@!",,,}) 
+    AADD(aC,{"dData"    ,{27,10} ,"Data de Emissao",,,,})
 //#ELSE 
 //    AADD(aC,{"cCliente" ,{6,5} ,"Cod. do Cliente","@!",'ExecBlock("MD2VLCLI",.F.,.F.)',"SA1",}) 
 //    AADD(aC,{"cLoja"    ,{6,40},"Loja","@!",,,}) 
