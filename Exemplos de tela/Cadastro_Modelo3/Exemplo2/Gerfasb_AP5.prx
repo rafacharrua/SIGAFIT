@@ -1,0 +1,447 @@
+#include "rwmake.ch"        // incluido pelo assistente de conversao do AP5 IDE em 09/06/00
+
+User Function Gerfasb()        // incluido pelo assistente de conversao do AP5 IDE em 09/06/00
+
+//зддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+//Ё Declaracao de variaveis utilizadas no programa atraves da funcao    Ё
+//Ё SetPrvt, que criara somente as variaveis definidas pelo usuario,    Ё
+//Ё identificando as variaveis publicas do sistema utilizadas no codigo Ё
+//Ё Incluido pelo assistente de conversao do AP5 IDE                    Ё
+//юддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+
+SetPrvt("DULTDATA,NOP,OGERA,NTOT,DDTINI,DDTULT")
+SetPrvt("NMDDOLAR,NTOTMD,NMD,CNOME,ATAXAS,ACONTAS")
+SetPrvt("NCTA,NSLDINI,ATAMNUM,CPROXNUM,CNUMSZ3,CLINSZ3")
+SetPrvt("DDATSZ3,CNUMSI2,NRECSI2,")
+
+/*/
+эээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээ
+╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠
+╠╠иммммммммммяммммммммммкмммммммяммммммммммммммммммммкммммммяммммммммммммм╩╠╠
+╠╠╨Programa  Ё GERFASB  ╨ Autor Ё Luiz Carlos Vieira ╨ Data ЁTue  29/09/98╨╠╠
+╠╠лммммммммммьммммммммммймммммммоммммммммммммммммммммйммммммоммммммммммммм╧╠╠
+╠╠╨Descri┤└o Ё Gera o arquivo SZ3 dos lanctos FASB a partir do SI2        ╨╠╠
+╠╠лммммммммммьмммммммммммммммммммммммммммммммммммммммммммммммммммммммммммм╧╠╠
+╠╠╨Uso       Ё Espec║fico para ESPN Brasil.                               ╨╠╠
+╠╠лммммммммммьмммммммммммммммммммммммммммммммммммммммммммммммммммммммммммм╧╠╠
+╠╠╨Observ.:  Ё Uso do parametro MV_FASBDT, data ultima contabilizacao FASB╨╠╠
+╠╠хммммммммммомммммммммммммммммммммммммммммммммммммммммммммммммммммммммммм╪╠╠
+╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠
+ъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъ
+/*/
+
+//зддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+//Ё Verifica se o parametro MV_FASBDT existe                            Ё
+//юддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+
+dbSelectArea("SX6")
+dbSetOrder(1)
+If !dbSeek(xFilial("SX6")+"MV_FASBDT")
+
+    Aviso("Aten┤└o!","O par┐metro MV_FASBDT foi criado com a Data Base: ";
+           +DTOC(dDataBase),{"Ok"})
+
+    RecLock("SX6",.T.)
+    SX6->X6_FIL     := xFilial("SX6")
+    SX6->X6_VAR     := "MV_FASBDT"
+    SX6->X6_TIPO    := "D"
+    SX6->X6_DESCRIC := "Data da ёltima contabiliza┤└o FASB."
+    SX6->X6_CONTEUD := DTOC(dDataBase)
+    MsUnLock()
+Endif
+dbSelectArea("SI2")
+
+//зддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+//Ё Variaveis do programa                                               Ё
+//юддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+
+dUltData := GetMv("MV_FASBDT")
+
+//зддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+//Ё Se o mes e o ano da data base forem menores do que dUltData, erro!  Ё
+//юддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+
+If ( Year(dDataBase) < Year(dUltData) ) .Or. ;
+   ( Year(dDataBase) == Year(dUltData) .And. ;
+     Month(dDataBase) < Month(dUltData)        )
+
+    Aviso("Erro!","A Data Base do sistema est═ menor do que o conteёdo do par┐metro MV_FASBDT: ";
+           +DTOC(dUltData),{"Ok"})
+
+    Return
+
+Endif
+
+//зддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+//Ё Tela de confirmacao do processamento                                Ё
+//юддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+
+#IFNDEF WINDOWS
+    DrawAdvWindow("Contabiliza┤└o FASB Off-Line",04,06,17,73)
+    @05,07 Say "здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©" Color "B/BG"
+    @06,07 Say "Ё                                                                Ё" Color "B/BG"
+    @07,07 Say "Ё                                                                Ё" Color "B/BG"
+    @08,07 Say "Ё Este programa tem como objetivo gerar o arquivo SZ3 com os lan Ё" Color "B/BG"
+    @09,07 Say "Ё ┤amentos cont═beis FASB, a partir da amarra┤└o FASB-SIGA (SZ1) Ё" Color "B/BG"
+    @10,07 Say "Ё e do arquivo de lan┤amentos cont═beis do Siga Advanced (SI2).  Ё" Color "B/BG"
+    @11,07 Say "Ё Os c═lculos s└o efetuados de acordo com o tipo das contas FASB Ё" Color "B/BG"
+    @12,07 Say "Ё Monet═rias, Hist╒ricas ou de Resultado.                        Ё" Color "B/BG"
+    @13,07 Say "Ё                                                                Ё" Color "B/BG"
+    @14,07 Say "Ё                                                                Ё" Color "B/BG"
+    @15,07 Say "Ё                                                                Ё" Color "B/BG"
+    @16,07 Say "юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды" Color "B/BG"
+
+    @06,09 Say "Data da ёltima contabiliza┤└o FASB: "+DTOC(dUltData)                Color "W+/BG"
+    @14,09 Say "Aten┤└o:  O reprocessamento desta rotina dentro do mesmo per║o"     Color "W+/BG"
+    @15,09 Say "do (ano e mes), sobrescreve os lan┤amentos j═ existentes.     "     Color "W+/BG"
+
+    While .T.
+        nOp := MenuH({"Confirma","Abandona"},17,07,"b/w,w+/n,r/w","CA","Quanto ao Processamento?",1)
+        Do Case
+        Case nOp == 1 // Confirma
+            RunProc()
+            Exit
+        Case nOp == 2 .Or. nOp == 0 // Abandona
+            Exit
+        EndCase
+    EndDo
+#ELSE
+    oGera := NIL
+    @ 107,064 To 355,706 Dialog oGera Title "Contabiliza┤└o FASB Off-Line"
+
+    @ 001,001 To 016,320
+    @ 007,004 Say OemToAnsi("Data da ёltima contabiliza┤└o FASB: "+DTOC(dUltData)) Size 200,07
+
+    @ 018,001 To 122,320
+
+    @ 027,004 Say OemToAnsi("Este programa tem como objetivo gerar o arquivo SZ3 com os lan┤amentos cont═beis FASB, a partir da amarra┤└o")
+    @ 038,004 Say OemToAnsi("FASB - SIGA (SZ1) e do arquivo de lan┤amentos cont═beis do Siga Advanced (SI2). Os c═lculos s└o efetuados de")
+    @ 049,004 Say OemToAnsi("acordo com o tipo das contas FASB Monet═rias, Hist╒ricas ou de Resultado.                                   ")
+    @ 093,004 Say OemToAnsi("Aten┤└o:  O reprocessamento desta rotina dentro do mesmo per║odo (ano e mes), sobrescreve os lan┤amentos j═ ")
+    @ 104,004 Say OemToAnsi("existentes.")
+
+    @ 089,290 BmpButton Type 1 Action RunProc()// Substituido pelo assistente de conversao do AP5 IDE em 09/06/00 ==>     @ 089,290 BmpButton Type 1 Action Execute(RunProc)
+    @ 105,290 BmpButton Type 2 Action Close(oGera)
+    Activate Dialog oGera
+
+#ENDIF
+
+Return
+
+/*/
+эээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээ
+╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠
+╠╠иммммммммммяммммммммммкмммммммяммммммммммммммммммммкммммммяммммммммммммм╩╠╠
+╠╠╨Fun┤└o    Ё RUNPROC  ╨ Autor Ё Luiz Carlos Vieira ╨ Data ЁTue  29/09/98╨╠╠
+╠╠лммммммммммьммммммммммймммммммоммммммммммммммммммммйммммммоммммммммммммм╧╠╠
+╠╠╨Descri┤└o Ё Rotina para continuacao do processamento                   ╨╠╠
+╠╠лммммммммммьмммммммммммммммммммммммммммммммммммммммммммммммммммммммммммм╧╠╠
+╠╠╨Uso       Ё Espec║fico para ESPN Brasil.                               ╨╠╠
+╠╠хммммммммммомммммммммммммммммммммммммммммммммммммммммммммммммммммммммммм╪╠╠
+╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠
+ъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъ
+/*/
+
+// Substituido pelo assistente de conversao do AP5 IDE em 09/06/00 ==> Function RunProc
+Static Function RunProc()
+
+dbSelectArea("SZ3")
+nTot := RecCount()
+dbSelectArea("SI2")
+nTot := nTot + RecCount()
+
+//зддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+//Ё Regua de processamento                                              Ё
+//юддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+
+#IFDEF WINDOWS
+    Processa({|| StatFunc()},"Contabiliza┤└o")// Substituido pelo assistente de conversao do AP5 IDE em 09/06/00 ==>     Processa({|| Execute(StatFunc)},"Contabiliza┤└o")
+    Return
+// Substituido pelo assistente de conversao do AP5 IDE em 09/06/00 ==>     Function StatFunc
+Static Function StatFunc()
+    ProcRegua(nTot)
+#ELSE
+    SetRegua(nTot)
+#ENDIF
+
+//зддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+//Ё Data inicial e data final para o processamento, obtida no mes atual Ё
+//юддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+
+dDtIni := CTOD("01"+Substr(DTOC(dUltData),3))
+dDtUlt := dUltData
+While Month(dDtUlt) == Month(dUltData) .And. ;
+      Year(dDtUlt)  == Year(dUltData)
+
+    dDtUlt := dDtUlt + 1
+
+EndDo
+dDtUlt := dDtUlt - 1
+
+//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+//Ё Processamento parte 1 - Deleta os registros do SZ3 do periodo que possam Ё
+//Ё existir.                                                                 Ё
+//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+
+dbSelectArea("SZ3")
+dbSetOrder(1)
+dbSeek(xFilial("SZ3")+DTOS(dDtIni),.T.)
+While !EOF() .And. xFilial("SZ3") == SZ3->Z3_FILIAL .And. ;
+      SZ3->Z3_DATA <= dDtUlt
+
+    #IFNDEF WINDOWS
+        IncRegua()
+    #ELSE
+        IncProc("Limpando lan┤amentos existentes...")
+    #ENDIF
+
+    RecLock("SZ3",.F.)
+    dbDelete()
+    MsUnLock()
+    dbSelectArea("SX2")
+    dbSeek("SZ3")
+    RecLock("SX2",.F.)
+    SX2->X2_DELET := SX2->X2_DELET + 1
+    MsUnLock()
+    dbSelectArea("SZ3")
+
+    dbSkip()
+
+EndDo
+
+//зддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+//Ё Processamento parte 2 - Obtencao das taxas para calculos em aTaxas: Ё
+//Ё 1. Taxa final do mes anterior                                       Ё
+//Ё 2. Taxa media do mes corrente                                       Ё
+//Ё 3. Taxa final do mes corrente                                       Ё
+//юддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+
+nMdDolar   := 1
+nTotMd     := ContaMoedas()
+For nMd    := 1 To nTotMd
+    cNome  := GetMv("MV_MOEDA"+StrZero(nMd,1))
+    If "DOLAR" $ UPPER(cNome)
+        nMdDolar := nMd
+    Endif
+Next nMd
+
+aTaxas     := {0,0,0}
+aTaxas[1]  := RecMoeda(dDtIni-1 , StrZero(nMdDolar,1))
+aTaxas[2]  := Media(nMdDolar                         )
+aTaxas[3]  := RecMoeda(dDtUlt   , StrZero(nMdDolar,1))
+
+//зддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+//Ё Processamento parte 2 - Gera lancamentos a partir do SI2            Ё
+//юддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+
+dbSelectArea("SI2")
+dbSetOrder(3)        // FILIAL+DATA+NUM+LINHA
+dbSeek(xFilial("SI2")+DTOS(dDtIni),.T.)
+
+While !EOF() .And. xFilial("SI2") == SI2->I2_FILIAL .And. ;
+      SI2->I2_DATA <= dDtUlt
+
+    #IFNDEF WINDOWS
+        IncRegua()
+    #ELSE
+        IncProc("Gerando lan┤amentos FASB...")
+    #ENDIF
+
+    //зддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+    //Ё Localizando as contas no SZ2, pode saber em que conta FASB pertence Ё
+    //Ё e acumular no SZ3 os valores pela data de acordo com o tipo do lan- Ё
+    //Ё camento (DEBITO ou CREDITO)                                         Ё
+    //юддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+
+    aContas := {}
+    If SI2->I2_DC == "D"
+        aAdd(aContas , {SI2->I2_DEBITO  ,"D"})
+    ElseIf SI2->I2_DC == "C"
+        aAdd(aContas , {SI2->I2_CREDITO ,"C"})
+    ElseIf SI2->I2_DC == "X"
+        aAdd(aContas , {SI2->I2_DEBITO  ,"D"})
+        aAdd(aContas , {SI2->I2_CREDITO ,"C"})
+    Endif
+
+    For nCta := 1 To Len(aContas)
+
+        //здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+        //Ё Se determinada conta pertencer a mais de uma conta FASB, processa todas  Ё
+        //юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+
+        dbSelectArea("SZ2")
+        dbSetOrder(2)
+        dbSeek(xFilial("SZ2")+aContas[nCta,1])
+        While !EOF() .And. xFilial("SZ2") == SZ2->Z2_FILIAL .And. ;
+              SZ2->Z2_CONTA == aContas[nCta,1]
+
+            //зддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+            //Ё Pesquisa a conta FASB no SZ1                                        Ё
+            //юддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+
+            dbSelectArea("SZ1")
+            dbSetOrder(1)
+            dbSeek(xFilial("SZ1")+SZ2->Z2_CODIGO)
+
+            //зддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+            //Ё Variavel para o saldo inicial da movimentecao da conta FASB         Ё
+            //юддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+
+            nSldIni := 0
+
+            //зддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+            //Ё Pesquisa no SZ3 pela conta FASB na mesma data do lancto do SI2      Ё
+            //юддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+
+            dbSelectArea("SZ3")
+            dbSetOrder(1)
+            If !dbSeek(xFilial("SZ3")+DTOS(SI2->I2_DATA)+SZ1->Z1_CODIGO)
+
+                //зддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+                //Ё Calcula o saldo inicial para a conta FASB encontrada                Ё
+                //юддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+
+                CalcSldIni()
+
+                //зддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+                //Ё Obtencao do proximo numero do movimento                             Ё
+                //юддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+                aTamNum  := TamSx3("Z3_NUM")
+                dbSelectArea("SX3")
+                dbSetOrder(2)
+                dbSeek("Z3_NUM")
+                dbSelectArea("SZ3")
+                cProxNum := ProxReg(1,aTamNum[1],2)
+
+                RecLock("SZ3",.T.)
+                SZ3->Z3_FILIAL := xFilial("SZ3")
+                SZ3->Z3_DATA   := SI2->I2_DATA
+                SZ3->Z3_CODIGO := SZ1->Z1_CODIGO
+                SZ3->Z3_NUM    := cProxNum
+                SZ3->Z3_LINHA  := "01"
+            Else
+                RecLock("SZ3",.F.)
+            Endif
+
+            //зддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+            //Ё Calculo da movimentacao. Para todas as contas o movimento e divididoЁ
+            //Ё pela taxa media do mes.                                             Ё
+            //юддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+
+            If aContas[nCta,2] == "D"
+                SZ3->Z3_VALOR  := nSldIni + SZ3->Z3_VALOR + NoRound(SI2->I2_VALOR / If(aTaxas[2]<=0,1,aTaxas[2]) ,2)
+            Else
+                SZ3->Z3_VALOR  := nSldIni + SZ3->Z3_VALOR - NoRound(SI2->I2_VALOR / If(aTaxas[2]<=0,1,aTaxas[2]) ,2)
+            Endif
+            SZ3->Z3_HP         := SI2->I2_HP
+            SZ3->Z3_HIST       := SI2->I2_HIST
+
+            MsUnLock()
+
+            //зддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+            //Ё Caso existem lanctos no SI2 com DC = "-", leva os historicos p/ o SZ3 Ё
+            //юддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+
+            cNumSZ3 := SZ3->Z3_NUM
+            cLinSZ3 := StrZero(Val(SZ3->Z3_LINHA)+1,2)
+            dDatSZ3 := SZ3->Z3_DATA
+            cNumSI2 := SI2->I2_NUM
+
+            dbSelectArea("SI2")
+            nRecSI2 := Recno()
+
+            While !EOF() .And. xFilial("SI2") == SI2->I2_FILIAL .And. ;
+                  SI2->I2_NUM == cNumSI2 .And. SI2->I2_DATA == dDatSZ3 .And. ;
+                  SI2->I2_DC == "-"
+
+                dbSelectArea("SZ3")
+                RecLock("SZ3",.T.)
+                SZ3->Z3_FILIAL := xFilial("SZ3")
+                SZ3->Z3_DATA   := SI2->I2_DATA
+                SZ3->Z3_CODIGO := SZ1->Z1_CODIGO
+                SZ3->Z3_NUM    := cNumSZ3
+                SZ3->Z3_LINHA  := cLinSZ3
+                SZ3->Z3_HP     := SI2->I2_HP
+                SZ3->Z3_HIST   := SI2->I2_HIST
+                MsUnLock()
+
+                cLinSZ3        := StrZero(Val(cLinSZ3)+1,2)
+
+                dbSelectArea("SI2")
+                dbSkip()
+            EndDo
+
+            dbGoTo(nRecSI2)
+
+            dbSelectArea("SZ2")
+            dbSkip()
+        EndDo
+    Next nCta
+
+    dbSelectArea("SI2")
+    dbSkip()
+EndDo
+
+dbSelectArea("SZ3")
+RetIndex("SZ3")
+dbSelectArea("SZ1")
+
+#IFDEF WINDOWS
+    Close(oGera)
+#ENDIF
+
+Return
+
+/*/
+эээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээээ
+╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠
+╠╠иммммммммммяммммммммммкмммммммяммммммммммммммммммммкммммммяммммммммммммм╩╠╠
+╠╠╨Fun┤└o    ЁCALCSLDINI╨ Autor Ё Luiz Carlos Vieira ╨ Data ЁMon  05/10/98╨╠╠
+╠╠лммммммммммьммммммммммймммммммоммммммммммммммммммммйммммммоммммммммммммм╧╠╠
+╠╠╨Descri┤└o Ё Calcula o saldo inicial da conta FASB                      ╨╠╠
+╠╠лммммммммммьмммммммммммммммммммммммммммммммммммммммммммммммммммммммммммм╧╠╠
+╠╠╨Uso		 Ё Espec║fico para clientes Microsiga						  ╨╠╠
+╠╠хммммммммммомммммммммммммммммммммммммммммммммммммммммммммммммммммммммммм╪╠╠
+╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠
+ъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъъ
+/*/
+
+// Substituido pelo assistente de conversao do AP5 IDE em 09/06/00 ==> Function CalcSldIni
+Static Function CalcSldIni()
+
+//зддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+//Ё Variaveis                                                           Ё
+//юддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+
+nSldIni   := 0
+
+Do Case
+
+//зддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+//Ё Para as contas monetarias, o saldo inicial deve ser dividido pela taxa finalЁ
+//Ё do mes anterior.                                                            Ё
+//юддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+
+Case SZ1->Z1_CLASSE == "M" // Monetarias
+
+    nSldIni := NoRound(SZ1->Z1_SALANT / aTaxas[1] , 2)
+
+//зддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+//Ё Para as contas historicas, o saldo inicial e exatamente o mesmo do mes anterior Ё
+//юддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+
+Case SZ1->Z1_CLASSE == "H" // Historicas
+
+    nSldIni := SZ1->Z1_SALANT
+
+//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+//Ё Para as contas de resultado o saldo inicial e divido pelo dolar medio do mes Ё
+//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+
+Case SZ1->Z1_CLASSE == "R" // Resultado
+
+    nSldIni := NoRound(SZ1->Z1_SALANT / aTaxas[2] , 2)
+
+EndCase
+
+Return

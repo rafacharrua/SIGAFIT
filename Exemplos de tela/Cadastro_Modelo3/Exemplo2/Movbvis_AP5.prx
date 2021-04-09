@@ -1,0 +1,122 @@
+#include "rwmake.ch"        // incluido pelo assistente de conversao do AP5 IDE em 09/06/00
+
+User Function Movbvis()        // incluido pelo assistente de conversao do AP5 IDE em 09/06/00
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Declaracao de variaveis utilizadas no programa atraves da funcao    ³
+//³ SetPrvt, que criara somente as variaveis definidas pelo usuario,    ³
+//³ identificando as variaveis publicas do sistema utilizadas no codigo ³
+//³ Incluido pelo assistente de conversao do AP5 IDE                    ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+SetPrvt("COPCAO,NOPCE,NOPCG,NUSADO,AHEADER,ACOLS")
+SetPrvt("N,_NI,CTITULO,CALIASENCHOICE,CALIASGETD,CLINOK")
+SetPrvt("CTUDOK,CFIELDOK,ACPOENCHOICE,_LRET,")
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºPrograma  ³ MOVBVIS  º Autor ³ Luiz Carlos Vieira º Data ³Mon  19/10/98º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDescri‡„o ³ Programa de Visualizacao da movimentacao do mes            º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³ Espec¡fico para ESPN Brasil. Usado por MOVFASB.PRX         º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+
+dbSelectArea("SZ1")
+If EOF() .And. BOF()
+    Help("",1,"ARQVAZIO")
+    Return
+Endif
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Opcoes de acesso para a Modelo 3                             ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+cOpcao := "VISUALIZAR"
+
+Do Case
+    Case cOpcao == "INCLUIR"    ; nOpcE := 3 ; nOpcG := 3
+    Case cOpcao == "ALTERAR"    ; nOpcE := 3 ; nOpcG := 3
+    Case cOpcao == "VISUALIZAR" ; nOpcE := 2 ; nOpcG := 2
+EndCase
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Cria variaveis M->????? da Enchoice                          ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+RegToMemory("SZ1",(cOpcao == "INCLUIR"))
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Cria aHeader e aCols da GetDados                             ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+nUsado  := 0
+dbSelectArea("SX3")
+dbSeek("SZ3")
+aHeader := {}
+While !Eof().And.(x3_arquivo=="SZ3")
+    If Upper(AllTrim(X3_CAMPO)) == "Z3_CODIGO"
+        dbSkip()
+        Loop
+    Endif
+    If X3USO(x3_usado) .And. cNivel >= x3_nivel
+    	nUsado:=nUsado+1
+        Aadd(aHeader,{ TRIM(x3_titulo), x3_campo, x3_picture,;
+             x3_tamanho, x3_decimal,X3_VALID,;
+    	     x3_usado, x3_tipo, x3_arquivo, x3_context } )
+	Endif
+    dbSkip()
+End
+
+If cOpcao == "INCLUIR"
+    aCols := {Array(nUsado+1)}
+	aCols[1,nUsado+1]:=.F.
+    n     := 1
+	For _ni:=1 to nUsado
+		aCols[1,_ni]:=CriaVar(aHeader[_ni,2])
+	Next
+Else
+	aCols:={}
+    dbSelectArea("SZ3")
+    dbSetOrder(3)
+    dbSeek(xFilial()+M->Z1_CODIGO)
+    While !eof() .and. xFilial() == SZ3->Z3_FILIAL .And. ;
+          SZ3->Z3_CODIGO == M->Z1_CODIGO
+
+		AADD(aCols,Array(nUsado+1))
+		For _ni:=1 to nUsado
+            If Upper(AllTrim(aHeader[_ni,10])) != "V" // Campo Real
+                aCols[Len(aCols),_ni] := FieldGet(FieldPos(aHeader[_ni,2]))
+            Else
+                aCols[Len(aCols),_ni] := CriaVar(aHeader[_ni,2])
+            Endif
+		Next 
+		aCols[Len(aCols),nUsado+1]:=.F.
+		dbSkip()
+
+	End
+Endif
+
+If Len(aCols)<=0
+    Help("",1,"NOSALDOS")
+    Return
+Endif
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Executa a Modelo 3                                           ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+cTitulo        := "Movimentacao FASB - Visualizar"
+cAliasEnchoice := "SZ1"
+cAliasGetD     := "SZ3"
+cLinOk         := "AllwaysTrue()"
+cTudOk         := "AllwaysTrue()"
+cFieldOk       := "AllwaysTrue()"
+aCpoEnchoice   := {"Z1_CODIGO"}
+
+_lRet := Modelo3(cTitulo,cAliasEnchoice,cAliasGetD,aCpoEnchoice,cLinOk,cTudOk,nOpcE,nOpcG,cFieldOk)
+
+Return

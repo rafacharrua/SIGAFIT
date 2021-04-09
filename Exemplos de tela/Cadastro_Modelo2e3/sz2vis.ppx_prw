@@ -1,0 +1,140 @@
+
+
+
+
+
+
+
+
+
+
+
+Function U_SZ2VIS()
+
+
+
+
+
+
+
+nOpcx  := 1
+
+_nItem := 0
+_nProp := 0
+_nUm   := 0
+_nNorm := 0
+_nEspe := 0
+
+_sAlias := Alias()
+_sRec   := Recno()
+
+
+
+
+dbSelectArea("SX3")
+dbSetOrder(1)
+dbSeek("SZ2")
+nUsado  := 0
+aHeader := {}
+While !Eof() .And.  (x3_arquivo == "SZ2")
+    If AllTrim(X3_CAMPO)=="Z2_FILIAL" .Or.  AllTrim(X3_CAMPO)=="Z2_CODIGO" .Or.  AllTrim(X3_CAMPO)=="Z2_REVOBS"
+        dbSkip()
+        Loop
+    Endif
+	IF X3USO(x3_usado) .AND.  cNivel >= x3_nivel
+    	nUsado := nUsado+1
+
+
+        AADD(aHeader,{ TRIM(x3_titulo) , AllTrim(x3_campo) , x3_picture , x3_tamanho , x3_decimal , "" , x3_usado   , x3_tipo    , x3_arquivo , x3_context } )
+    Endif
+    dbSkip()
+EndDo
+
+
+
+
+dbSelectArea("SZ2")
+dbSetOrder(1)
+cProduto := SZ2->Z2_CODIGO
+dbSeek(xFilial("SZ2")+cProduto)
+
+dbSelectArea("SB1")
+dbSetOrder(1)
+dbSeek(xFilial("SB1")+cProduto)
+
+
+
+
+cLocal   := SB1->B1_LOCPAD
+cDescr   := SB1->B1_DESC
+
+
+
+
+cObs := SZ2->Z2_REVOBS
+
+dbSelectArea("SZ2")
+aCols := {}
+
+While !Eof() .And.  cProduto==SZ2->Z2_CODIGO
+    aAdd(aCols , {SZ2->Z2_ITEM , SZ2->Z2_PROPRIE , SZ2->Z2_UM , Z2_NORMA , Z2_ESPEC , .F. })
+    dbSkip()
+EndDo
+
+
+
+
+
+cTitulo:="Cadastro de Especifica‡”es"
+
+
+
+
+aC:={}
+
+
+
+
+
+
+
+AADD(aC,{"cProduto" ,{05,03} ,"C¢d. do Produto"   ,"@!"           ,,, .F. })
+AADD(aC,{"cLocal"   ,{05,42} ,"Local"             ,"@!"           ,,, .F. })
+AADD(aC,{"cDescr"   ,{06,03} ,"Descri‡„o"         ,"@!"           ,,, .F. })
+
+
+
+
+aR:={}
+
+
+
+
+
+
+
+AADD(aR,{"cObs" ,{20,03},"Observa‡„o"    ,"",,, .F. })
+
+
+
+
+aCGD:={08,04,16,74}
+
+
+
+
+cLinhaOk := ""
+cTudoOk  := ""
+
+
+
+
+
+
+
+lRetMod2 := Modelo2(cTitulo,aC,aR,aCGD,nOpcx,cLinhaOk,cTudoOk)
+
+dbSelectArea(_sAlias)
+dbGoto(_sRec)
+
+Return

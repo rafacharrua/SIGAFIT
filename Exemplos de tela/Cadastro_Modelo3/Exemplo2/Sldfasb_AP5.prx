@@ -1,0 +1,354 @@
+#include "rwmake.ch"        // incluido pelo assistente de conversao do AP5 IDE em 09/06/00
+
+User Function Sldfasb()        // incluido pelo assistente de conversao do AP5 IDE em 09/06/00
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Declaracao de variaveis utilizadas no programa atraves da funcao    ³
+//³ SetPrvt, que criara somente as variaveis definidas pelo usuario,    ³
+//³ identificando as variaveis publicas do sistema utilizadas no codigo ³
+//³ Incluido pelo assistente de conversao do AP5 IDE                    ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+SetPrvt("DULTDATA,DDTINI,DDTULT,CKEY,CIND,CFILTER")
+SetPrvt("NOP,OGERA,NMDDOLAR,NTOTMD,NMD,CNOME")
+SetPrvt("ATAXAS,CFASB,NSALDO,NSLDINI,")
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºPrograma  ³ SLDFASB  º Autor ³ Luiz Carlos Vieira º Data ³Mon  19/10/98º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDescri‡„o ³ Rotina para atualizacao dos saldos de contas FASB          º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³ Espec¡fico para ESPN Brasil.                               º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºObserv.:  ³ Alteracao no parametro MV_FASBDT, dt ult. contabiliz. FASB º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Verifica se o parametro MV_FASBDT existe                            ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+dbSelectArea("SX6")
+dbSetOrder(1)
+If !dbSeek(xFilial("SX6")+"MV_FASBDT")
+
+    Aviso("Aten‡„o!","O parƒmetro MV_FASBDT foi criado com a Data Base: ";
+           +DTOC(dDataBase),{"Ok"})
+
+    RecLock("SX6",.T.)
+    SX6->X6_FIL     := xFilial("SX6")
+    SX6->X6_VAR     := "MV_FASBDT"
+    SX6->X6_TIPO    := "D"
+    SX6->X6_DESCRIC := "Data da £ltima contabiliza‡„o FASB."
+    SX6->X6_CONTEUD := DTOC(dDataBase)
+    MsUnLock()
+Endif
+dbSelectArea("SZ3")
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis do programa                                               ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+dUltData := GetMv("MV_FASBDT")
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Se o mes e o ano da data base forem menores do que dUltData, erro!  ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+If ( Year(dDataBase) < Year(dUltData) ) .Or. ;
+   ( Year(dDataBase) == Year(dUltData) .And. ;
+     Month(dDataBase) < Month(dUltData)        )
+
+    Aviso("Erro!","A Data Base do sistema est  menor do que o conte£do do parƒmetro MV_FASBDT: ";
+           +DTOC(dUltData),{"Ok"})
+
+    Return
+
+Endif
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Data inicial e data final para o processamento, obtida no mes atual ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+dDtIni := CTOD("01"+Substr(DTOC(dUltData),3))
+dDtUlt := dUltData
+While Month(dDtUlt) == Month(dUltData) .And. ;
+      Year(dDtUlt)  == Year(dUltData)
+
+    dDtUlt := dDtUlt + 1
+
+EndDo
+dDtUlt := dDtUlt - 1
+
+dbSelectArea("SZ3")
+dbSetOrder(3)
+cKey    := IndexKey()
+cInd    := CriaTrab(NIL,.F.)
+cFilter := "Z3_FILIAL == '"+xFilial("SZ3")+"' .And. DTOS(Z3_DATA) >= '"+DTOS(dDtIni)+"' .And. DTOS(Z3_DATA) <= '"+DTOS(dDtUlt)+"'"
+IndRegua("SZ3",cInd,cKey,,cFilter,"Selecionando Registros...")
+
+If EOF() .And. BOF()
+    Help(1,"","NOMOVIM")
+    RetIndex("SZ3")
+    Return
+Endif
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Tela de confirmacao do processamento                                ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+#IFNDEF WINDOWS
+    DrawAdvWindow("Atualiza‡„o de saldos FASB",04,06,17,73)
+    @05,07 Say "ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿" Color "B/BG"
+    @06,07 Say "³                                                                ³" Color "B/BG"
+    @07,07 Say "³                                                                ³" Color "B/BG"
+    @08,07 Say "³ Este programa tem como objetivo atualizar os saldos das contas ³" Color "B/BG"
+    @09,07 Say "³ FASB atrav‚s dos lan‡amentos cont beis FASB, gerados anterior- ³" Color "B/BG"
+    @10,07 Say "³ mente no arquivo SZ3.                                          ³" Color "B/BG"
+    @11,07 Say "³ O saldo das movimentacoes sera levado para o cadastro de contas³" Color "B/BG"
+    @12,07 Say "³ FASB de acordo com o periodo corrente.                         ³" Color "B/BG"
+    @13,07 Say "³                                                                ³" Color "B/BG"
+    @14,07 Say "³                                                                ³" Color "B/BG"
+    @15,07 Say "³                                                                ³" Color "B/BG"
+    @16,07 Say "ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ" Color "B/BG"
+
+    @06,09 Say "Data da £ltima contabiliza‡„o FASB: "+DTOC(dUltData)                Color "W+/BG"
+    @14,09 Say "Aten‡„o: O reprocessamento desta rotina no mesmo per¡odo sobres"    Color "W+/BG"
+    @15,09 Say "creve os saldos existentes com o da movimenta‡„o do per¡odo."       Color "W+/BG"
+
+    While .T.
+        nOp := MenuH({"Confirma","Abandona"},17,07,"b/w,w+/n,r/w","CA","Quanto ao Processamento?",1)
+        Do Case
+        Case nOp == 1 // Confirma
+            RunProc()
+            Exit
+        Case nOp == 2 .Or. nOp == 0 // Abandona
+            Exit
+        EndCase
+    EndDo
+#ELSE
+    oGera := NIL
+    @ 107,064 To 355,706 Dialog oGera Title "Contabiliza‡„o FASB Off-Line"
+
+    @ 001,001 To 016,320
+    @ 007,004 Say OemToAnsi("Data da £ltima contabiliza‡„o FASB: "+DTOC(dUltData)) Size 200,07
+
+    @ 018,001 To 122,320
+
+    @ 027,004 Say OemToAnsi("Este programa tem como objetivo atualizar os saldos das contas FASB atrav‚s dos lan‡amentos")
+    @ 038,004 Say OemToAnsi("cont beis FASB, gerados anteriormente no arquivo SZ3. O saldo das movimentacoes sera levado")
+    @ 049,004 Say OemToAnsi("para o cadastro de contas FASB de acordo com o periodo corrente.")
+
+    @ 093,004 Say OemToAnsi("Aten‡„o:  O reprocessamento desta rotina dentro do mesmo per¡odo (ano e mes), sobrescreve os saldos")
+    @ 104,004 Say OemToAnsi("existentes com o da movimentacao do periodo.")
+
+    @ 089,290 BmpButton Type 1 Action RunProc()// Substituido pelo assistente de conversao do AP5 IDE em 09/06/00 ==>     @ 089,290 BmpButton Type 1 Action Execute(RunProc)
+    @ 105,290 BmpButton Type 2 Action Close(oGera)
+    Activate Dialog oGera
+
+#ENDIF
+
+RetIndex("SZ3")
+
+Return
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºFun‡„o    ³ RUNPROC  º Autor ³ Luiz Carlos Vieira º Data ³Mon  19/10/98º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDescri‡„o ³ Rotina para continuacao do processamento                   º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³ Espec¡fico para ESPN Brasil.                               º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+
+// Substituido pelo assistente de conversao do AP5 IDE em 09/06/00 ==> Function RunProc
+Static Function RunProc()
+
+dbSelectArea("SZ3")
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Regua de processamento                                              ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+#IFDEF WINDOWS
+    Processa({|| StatFunc()},"Atualizacao de Saldos")// Substituido pelo assistente de conversao do AP5 IDE em 09/06/00 ==>     Processa({|| Execute(StatFunc)},"Atualizacao de Saldos")
+    Return
+// Substituido pelo assistente de conversao do AP5 IDE em 09/06/00 ==>     Function StatFunc
+Static Function StatFunc()
+    ProcRegua(RecCount())
+#ELSE
+    SetRegua(RecCount())
+#ENDIF
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Obtencao das taxas para calculos em aTaxas:                         ³
+//³ 1. Taxa final do mes anterior                                       ³
+//³ 2. Taxa media do mes corrente                                       ³
+//³ 3. Taxa final do mes corrente                                       ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+nMdDolar   := 1
+nTotMd     := ContaMoedas()
+For nMd    := 1 To nTotMd
+    cNome  := GetMv("MV_MOEDA"+StrZero(nMd,1))
+    If "DOLAR" $ UPPER(cNome)
+        nMdDolar := nMd
+    Endif
+Next nMd
+
+aTaxas     := {0,0,0}
+aTaxas[1]  := RecMoeda(dDtIni-1 , StrZero(nMdDolar,1))
+aTaxas[2]  := Media(nMdDolar                         )
+aTaxas[3]  := RecMoeda(dDtUlt   , StrZero(nMdDolar,1))
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Processamento. Atualizacao dos saldos.                                   ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+dbSelectArea("SZ3")
+
+While !EOF()
+
+    cFasb  := SZ3->Z3_CODIGO
+    nSaldo := 0
+
+    //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    //³ Posiciona o SZ1                                                     ³
+    //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+    dbSelectArea("SZ1")
+    dbSetOrder(1)
+    If !dbSeek(xFilial("SZ1")+cFasb)
+        dbSelectArea("SZ3")
+        dbSkip()
+        Loop
+    Endif
+    dbSelectArea("SZ3")
+
+    //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    //³ Acumula o saldo da conta atual                                      ³
+    //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+
+    While !EOF() .And. SZ3->Z3_CODIGO == cFasb
+
+        #IFNDEF WINDOWS
+            IncRegua()
+        #ELSE
+            IncProc("Limpando lan‡amentos existentes...")
+        #ENDIF
+
+        //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+        //³ Para as contas monetarias, o saldo final e dividido pela taxa final             ³
+        //³ Para as contas historicas, o saldo final e o proprio                            ³
+        //³ E para as contas de resultado, o saldo final e dividido pela taxa media do mes  ³
+        //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+        Do Case
+        Case SZ1->Z1_CLASSE == "M"
+            nSaldo := nSaldo + NoRound(SZ3->Z3_VALOR / aTaxas[3],2)
+        Case SZ1->Z1_CLASSE == "H"
+            nSaldo := nSaldo + SZ3->Z3_VALOR
+        Case SZ1->Z1_CLASSE == "R"
+            nSaldo := nSaldo + NoRound(SZ3->Z3_VALOR / aTaxas[2],2)
+        EndCase
+
+        dbSkip()
+    EndDo
+
+    //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    //³ Gravacao dos saldos no SZ1                                          ³
+    //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+    dbSelectArea("SZ1")
+    RecLock("SZ1",.F.)
+    SZ1->Z1_SALANT := nSaldo
+    MsUnLock()
+
+    dbSelectArea("SZ3")
+    dbSkip()
+
+EndDo
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Atualiza o conteudo do parametro MV_FASBDT                          ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+dbSelectArea("SX6")
+dbSetOrder(1)
+If dbSeek(xFilial("SX6")+"MV_FASBDT")
+    RecLock("SX6",.F.)
+    SX6->X6_CONTEUD := DTOC(dDataBase)
+    MsUnLock()
+Endif
+dbSelectArea("SZ1")
+
+#IFDEF WINDOWS
+    Close(oGera)
+#ENDIF
+
+Return
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºFun‡„o    ³CALCSLDINIº Autor ³ Luiz Carlos Vieira º Data ³Mon  05/10/98º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDescri‡„o ³ Calcula o saldo inicial da conta FASB                      º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso		 ³ Espec¡fico para clientes Microsiga						  º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+
+// Substituido pelo assistente de conversao do AP5 IDE em 09/06/00 ==> Function CalcSldIni
+Static Function CalcSldIni()
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis                                                           ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+nSldIni   := 0
+
+Do Case
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Para as contas monetarias, o saldo inicial deve ser dividido pela taxa final³
+//³ do mes anterior.                                                            ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+Case SZ1->Z1_CLASSE == "M" // Monetarias
+
+    nSldIni := NoRound(SZ1->Z1_SALANT / aTaxas[1] , 2)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Para as contas historicas, o saldo inicial e exatamente o mesmo do mes anterior ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+Case SZ1->Z1_CLASSE == "H" // Historicas
+
+    nSldIni := SZ1->Z1_SALANT
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Para as contas de resultado o saldo inicial e divido pelo dolar medio do mes ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+Case SZ1->Z1_CLASSE == "R" // Resultado
+
+    nSldIni := NoRound(SZ1->Z1_SALANT / aTaxas[2] , 2)
+
+EndCase
+
+Return

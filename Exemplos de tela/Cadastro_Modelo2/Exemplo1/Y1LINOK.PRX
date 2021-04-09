@@ -1,0 +1,50 @@
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Programa  ³ Y1LINOK  ³ Autor ³ Luiz Carlos Vieira    ³ Data ³ 20/05/97 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Rotina de validacao da linha do get dados.                 ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+
+_nUlt := Len(aCols[n])
+If !aCols[n,_nUlt] // Trata somente itens nao deletados. . .
+    _idx  := 1
+    _nIte := 0
+    _nPro := 0
+    _nUm  := 0
+    _nNor := 0
+    _nEsp := 0
+    For _idx:=1 to Len(aHeader)
+        cCab := AllTrim(aHeader[_idx,2])
+        Do Case
+        Case cCab == "Y1_ITEM"
+            _nIte := _idx
+        Case cCab == "Y1_PROPRIE"
+            _nPro := _idx
+        Case cCab == "Y1_UM"
+            _nUm  := _idx
+        Case cCab == "Y1_NORMA"
+            _nNor := _idx
+        Case cCab == "Y1_ESPEC"
+            _nEsp := _idx
+        EndCase
+    Next _idx
+    If _nIte==0 .Or. Empty(aCols[n,_nIte])
+        __Return(.F.)
+    ElseIf _nPro==0 .Or. Empty(aCols[n,_nPro])
+        __Return(.F.)
+    ElseIf _nUm==0 .Or. Empty(aCols[n,_nUm])
+        __Return(.F.)
+    ElseIf _nNor==0 .Or. Empty(aCols[n,_nNor])
+        __Return(.F.)
+    ElseIf _nEsp==0 .Or. Empty(aCols[n,_nEsp])
+        __Return(.F.)
+    Else
+        __Return(.T.)
+    Endif
+Endif
+ __Return(.T.)

@@ -1,0 +1,30 @@
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Programa  ³  Y1ITEM  ³ Autor ³Walter Caetano da Silva³ Data ³ 30/08/00 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Rotina de validacao e tratamento do item.                  ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+
+_nItem := aScan(aHeader,{|x| x[2]=="Z2_ITEM"})
+_nProp := aScan(aHeader,{|x| x[2]=="Z2_PROPRIE"})
+_nUm   := aScan(aHeader,{|x| x[2]=="Z2_UM"})
+_nNorm := aScan(aHeader,{|x| x[2]=="Z2_NORMA"})
+_Cont  := M->Z2_ITEM
+_nPos  := aScan(aCols,{|x| x[_nItem]==_Cont})
+If _nPos==0 .Or. _nPos==n
+    _cLinha := Tabela("64",_Cont)
+    M->Z2_PROPRIE   := Substr(_cLinha,1,33)
+    aCols[n,_nProp] := Substr(_cLinha,1,33)
+    M->Z2_UM        := Substr(_cLinha,34,9)
+    aCols[n,_nUm]   := Substr(_cLinha,34,9)
+    M->Z2_NORMA     := Substr(_cLinha,43,13)
+    aCols[n,_nNorm] := Substr(_cLinha,43,13)
+    __Return(.T.)
+Else
+    __Return(.F.)
+Endif

@@ -1,0 +1,178 @@
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Programa  ³  Y1INC   ³ Autor ³Walter Caetano da Silva³ Data ³ 30/08/00 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Rotina de inclusao de especificacoes Modelo 2              ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Opcao de acesso para o Modelo 2                              ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+// 3,4 Permitem alterar getdados e incluir linhas
+// 6 So permite alterar getdados e nao incluir linhas
+// Qualquer outro numero so visualiza
+
+nOpcx  := 3
+
+
+_nProp := 0
+_nUm   := 0
+_nNorm := 0
+_nEspe := 0
+
+_sAlias := Alias()
+_sRec   := Recno()
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Montando aHeader                                             ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+dbSelectArea("Sx3")
+dbSetOrder(1)
+dbSeek("SY1")
+nUsado:=0
+aHeader:={}
+While !Eof() .And. (x3_arquivo == "SY1")
+    If AllTrim(X3_CAMPO)=="Y1_FILIAL" .Or. AllTrim(X3_CAMPO)=="Y1_CODIGO";
+       .Or. AllTrim(X3_CAMPO)=="Y1_REVOBS"
+        dbSkip()
+        Loop
+    Endif
+	IF X3USO(x3_usado) .AND. cNivel >= x3_nivel
+    	nUsado:=nUsado+1
+        cNome := AllTrim(X3_CAMPO)
+        AADD(aHeader,{ TRIM(x3_titulo), AllTrim(x3_campo), x3_picture,;
+                x3_tamanho, x3_decimal, x3_vlduser, x3_usado, x3_tipo, x3_arquivo, x3_context } )
+    Endif
+    dbSkip()
+End
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Montando aCols                                               ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+aCols:=Array(1,nUsado+1)    
+dbSelectArea("Sx3")
+dbSeek("SY1")
+nUsado:=0
+While !Eof() .And. (x3_arquivo == "SY1")
+    If AllTrim(X3_CAMPO)=="Y1_FILIAL" .Or. AllTrim(X3_CAMPO)=="Y1_CODIGO";
+       .Or. AllTrim(X3_CAMPO)=="Y1_REVOBS"
+        dbSkip()
+        Loop
+    Endif
+	IF X3USO(x3_usado) .AND. cNivel >= x3_nivel
+        IF nOpcx == 3
+           nUsado:=nUsado+1
+           IF x3_tipo == "C"
+             aCOLS[1][nUsado] := SPACE(x3_tamanho)
+           Elseif x3_tipo == "N"
+             aCOLS[1][nUsado] := 0
+           Elseif x3_tipo == "D"
+             aCOLS[1][nUsado] := dDataBase
+           Elseif x3_tipo == "M"
+             aCOLS[1][nUsado] := ""
+           Else
+             aCOLS[1][nUsado] := .F.
+           Endif
+        Endif
+    Endif
+    dbSkip()
+End
+aCOLS[1][nUsado+1] := .F. 
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis do Cabecalho do Modelo 2                           ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+cProduto:=Space(15)
+cLocal  :=Space(2)
+cDescr  :=Space(40)
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis do Rodape do Modelo 2                              ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+cObs:=Space(50)
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Titulo da Janela                                             ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+cTitulo:="Cadastro de Especifica‡”es"
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Array com descricao dos campos do Cabecalho do Modelo 2      ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+aC:={}
+// aC[n,1] = Nome da Variavel Ex.:"cCliente"
+// aC[n,2] = Array com coordenadas do Get [x,y], em Windows estao em PIXEL
+// aC[n,3] = Titulo do Campo
+// aC[n,4] = Picture
+// aC[n,5] = Validacao
+// aC[n,6] = F3
+// aC[n,7] = Se campo e' editavel .t. se nao .f.
+
+AADD(aC,{"cProduto" ,{05,03} ,"C¢d. do Produto"   ,"@!"           ,"ExecBlock('Y1VALPRO',.F.,.F.)","SB1",})
+AADD(aC,{"cLocal"   ,{05,42} ,"Local"              ,"@!"          ,"!Empty(cLocal)",,})
+AADD(aC,{"cDescr"   ,{06,03} ,"Descri‡„o"         ,"@!"           ,,,.F.})
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Array com descricao dos campos do Rodape do Modelo 2         ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+aR:={}
+// aR[n,1] = Nome da Variavel Ex.:"cCliente"
+// aR[n,2] = Array com coordenadas do Get [x,y], em Windows estao em PIXEL
+// aR[n,3] = Titulo do Campo
+// aR[n,4] = Picture
+// aR[n,5] = Validacao
+// aR[n,6] = F3
+// aR[n,7] = Se campo e' editavel .t. se nao .f.
+
+AADD(aR,{"cObs" ,{20,03},"Observa‡„o"    ,"@!",,,})
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Array com coordenadas da GetDados no modelo2                 ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+aCGD:={08,04,16,74}
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Validacoes na GetDados da Modelo 2                           ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+cLinhaOk:="ExecBlock('Y1LINOK',.f.,.f.)"
+cTudoOk:="ExecBlock('Y1TUDOK',.f.,.f.)"
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Chamada da Modelo2                                           ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+// lRetMod2 = .t. se confirmou 
+// lRetMod2 = .f. se cancelou
+
+lRetMod2:=Modelo2(cTitulo,aC,aR,aCGD,nOpcx,cLinhaOk,cTudoOk)
+
+_nItem := aScan(aHeader,{|x| x[2]=="Y1_ITEM"})
+_nProp := aScan(aHeader,{|x| x[2]=="Y1_PROPRIE"})
+_nUm   := aScan(aHeader,{|x| x[2]=="Y1_UM"})
+_nNorm := aScan(aHeader,{|x| x[2]=="Y1_NORMA"})
+_nEspe := aScan(aHeader,{|x| x[2]=="Y1_ESPEC"})
+
+If lRetMod2 // Gravacao. . .
+    For _l := 1 To Len(aCols)
+        If !aCols[_l,Len(aHeader)+1]
+            dbSelectArea("SY1")
+            RecLock("SY1",.T.)
+            SY1->Y1_FILIAL  := xFilial("SY1")
+            SY1->Y1_CODIGO  := cProduto
+            SY1->Y1_ITEM    := aCols[_l,_nItem]
+            SY1->Y1_PROPRIE := aCols[_l,_nProp]
+            SY1->Y1_UM      := aCols[_l,_nUm]
+            SY1->Y1_NORMA   := aCols[_l,_nNorm]
+            SY1->Y1_ESPEC   := aCols[_l,_nEspe]
+            SY1->Y1_REVOBS  := cObs
+            MsUnLock()
+        EndIf
+    Next _l
+Endif
+
+dbSelectArea(_sAlias)
+dbGoto(_sRec)
+
+Return

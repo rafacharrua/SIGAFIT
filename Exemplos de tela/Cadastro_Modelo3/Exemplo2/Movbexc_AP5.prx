@@ -1,0 +1,153 @@
+#include "rwmake.ch"        // incluido pelo assistente de conversao do AP5 IDE em 09/06/00
+
+User Function Movbexc()        // incluido pelo assistente de conversao do AP5 IDE em 09/06/00
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Declaracao de variaveis utilizadas no programa atraves da funcao    ³
+//³ SetPrvt, que criara somente as variaveis definidas pelo usuario,    ³
+//³ identificando as variaveis publicas do sistema utilizadas no codigo ³
+//³ Incluido pelo assistente de conversao do AP5 IDE                    ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+SetPrvt("COPCAO,NOPCE,NOPCG,NUSADO,AHEADER,ACOLS")
+SetPrvt("_NI,_NPOSNUM,_NPOSLIN,_NPOSDATA,_NPOSVALOR,_NPOSDEL")
+SetPrvt("CTITULO,CALIASENCHOICE,CALIASGETD,CLINOK,CTUDOK,CFIELDOK")
+SetPrvt("ACPOENCHOICE,_LRET,_NIT,")
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºPrograma  ³ MOVBEXC  º Autor ³ Luiz Carlos Vieira º Data ³Mon  19/10/98º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDescri‡„o ³ Programa de Exclusao de lancamentos do mes                 º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³ Espec¡fico para ESPN Brasil. Usado por MOVFASB.PRX         º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+
+dbSelectArea("SZ1")
+If BOF() .And. EOF()
+    Help("",1,"ARQVAZIO")
+    Return
+Endif
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Opcoes de acesso para a Modelo 3                             ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+cOpcao := "VISUALIZAR"
+
+Do Case
+    Case cOpcao == "INCLUIR"    ; nOpcE := 3 ; nOpcG := 3
+    Case cOpcao == "ALTERAR"    ; nOpcE := 3 ; nOpcG := 3
+    Case cOpcao == "VISUALIZAR" ; nOpcE := 2 ; nOpcG := 2
+EndCase
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Cria variaveis M->????? da Enchoice                          ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+RegToMemory("SZ1",(cOpcao == "INCLUIR"))
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Cria aHeader e aCols da GetDados                             ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+nUsado  := 0
+dbSelectArea("SX3")
+dbSeek("SZ3")
+aHeader := {}
+While !Eof().And.(x3_arquivo=="SZ3")
+    If Upper(AllTrim(X3_CAMPO)) == "Z3_CODIGO"
+        dbSkip()
+        Loop
+    Endif
+    If X3USO(x3_usado) .And. cNivel >= x3_nivel
+    	nUsado:=nUsado+1
+        Aadd(aHeader,{ TRIM(x3_titulo), x3_campo, x3_picture,;
+             x3_tamanho, x3_decimal,X3_VALID,;
+    	     x3_usado, x3_tipo, x3_arquivo, x3_context } )
+	Endif
+    dbSkip()
+End
+
+If cOpcao == "INCLUIR"
+    aCols := {Array(nUsado+1)}
+	aCols[1,nUsado+1]:=.F.
+	For _ni:=1 to nUsado
+		aCols[1,_ni]:=CriaVar(aHeader[_ni,2])
+	Next
+Else
+	aCols:={}
+    dbSelectArea("SZ3")
+    dbSetOrder(3)
+    dbSeek(xFilial()+M->Z1_CODIGO)
+    While !eof() .and. xFilial() == SZ3->Z3_FILIAL .And. ;
+          SZ3->Z3_CODIGO == M->Z1_CODIGO
+
+		AADD(aCols,Array(nUsado+1))
+		For _ni:=1 to nUsado
+            If Upper(AllTrim(aHeader[_ni,10])) != "V" // Campo Real
+                aCols[Len(aCols),_ni] := FieldGet(FieldPos(aHeader[_ni,2]))
+            Else // Campo Virtual
+                aCols[Len(aCols),_ni] := CriaVar(aHeader[_ni,2])
+            Endif
+		Next 
+		aCols[Len(aCols),nUsado+1]:=.F.
+		dbSkip()
+
+	End
+Endif
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis de posicionamento no aCols                                ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+_nPosNum   := aScan(aHeader,{|x| AllTrim(Upper(x[2]))=="Z3_NUM" })
+_nPosLin   := aScan(aHeader,{|x| AllTrim(Upper(x[2]))=="Z3_LINHA" })
+_nPosData  := aScan(aHeader,{|x| AllTrim(Upper(x[2]))=="Z3_DATA"})
+_nPosValor := aScan(aHeader,{|x| AllTrim(Upper(x[2]))=="Z3_VALOR"})
+_nPosDel   := Len(aHeader) + 1
+
+If Len(aCols)<=0
+    Help("",1,"NOSALDOS")
+    Return
+Endif
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Executa a Modelo 3                                           ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+cTitulo        := "Movimentacao FASB - Excluir"
+cAliasEnchoice := "SZ1"
+cAliasGetD     := "SZ3"
+cLinOk         := "AllwaysTrue()"
+cTudOk         := "AllwaysTrue()"
+cFieldOk       := "AllwaysTrue()"
+aCpoEnchoice   := {"Z1_CODIGO"}
+
+_lRet := Modelo3(cTitulo,cAliasEnchoice,cAliasGetD,aCpoEnchoice,cLinOk,cTudOk,nOpcE,nOpcG,cFieldOk)
+
+If _lRet
+    //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    //³ Exclui os itens                                                     ³
+    //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    For _nIt := 1 To Len(aCols)
+        dbSelectArea("SZ3")
+        dbSetOrder(3)
+        If dbSeek(xFilial()+M->Z1_CODIGO+DTOS(aCols[_nIt,_nPosData])+aCols[_nIt,_nPosNum]+aCols[_nIt,_nPosLin])
+            RecLock("SZ3",.F.)
+            dbDelete()
+            MsUnLock()
+            dbSelectArea("SX2")
+            dbSeek("SZ3")
+            RecLock("SX2",.F.)
+            SX2->X2_DELET := SX2->X2_DELET + 1
+            MsUnLock()
+        Endif
+    Next _nIt
+
+Endif
+
+Return
