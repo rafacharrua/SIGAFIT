@@ -15,13 +15,12 @@ AAdd( aObjects, { 100, 40, .T., .T. })
 AAdd( aObjects, { 100, 40, .T., .T. })
 AAdd( aObjects, { 100, 40, .T., .T. })
 
-    aInfo := { aSize[1], aSize[2], aSize[3], aSize[4], aSize[5], 5, 5, 5, 5 }
-    aPosObj := MsObjSize( aInfo, aObjects, .T., .F.)
+aInfo   := { aSize[1], aSize[2], aSize[3], aSize[4], aSize[5], 5, 5, 5, 5 }
+aPosObj := MsObjSize( aInfo, aObjects, .T., .F.)
 
 //+-----------------------------------------------+
 //¦ Montando aHeader para a Getdados              ¦
 //+-----------------------------------------------+
-
 dbSelectArea("Sx3")
 dbSetOrder(1)
 
@@ -30,16 +29,19 @@ nUsado  := 0
 aHeader := {}
 
 While !Eof() .And. (x3_arquivo == "ZZC")    
-    IF X3USO(x3_usado) .AND. cNivel >= x3_nivel        
+//    If (AllTrim(X3_CAMPO)=="ZZC_MATRIC") 
+//        SX3->(dbSkip()) 
+//        Loop
+//    Endif
+    If X3USO(x3_usado) .AND. cNivel >= x3_nivel 
         nUsado := nUsado+1
         If Findfunction("MD2VALID")
             cMd2valid := "ExecBlock('Md2valid',.f.,.f.)"
         Endif        
-        AADD(aHeader,{ TRIM(x3_titulo),x3_campo,x3_picture,x3_tamanho,x3_decimal,; 
-        cMd2valid,x3_usado,x3_tipo, x3_arquivo, x3_context } )    
-    Endif    
+        AADD(aHeader , {TRIM(x3_titulo),x3_campo,x3_picture,x3_tamanho,x3_decimal,cMd2valid,x3_usado,x3_tipo, x3_arquivo, x3_context} ) 
+    Endif 
     dbSkip()
-End
+EndDo 
 
 //+-----------------------------------------------+
 //¦ Montando aCols para a GetDados                ¦
@@ -53,7 +55,7 @@ nUsado := 0
 
 While !Eof() .And. (x3_arquivo == "ZZC")    
     IF X3USO(x3_usado) .AND. cNivel >= x3_nivel       
-        nUsado := nUsado+1        
+        nUsado := nUsado+1 
         IF nOp == 3 
             IF     x3_tipo == "C" 
                 aCOLS[1][nUsado] := SPACE(x3_tamanho)                
@@ -83,18 +85,16 @@ dData    := Date()
 //+----------------------------------------------+
 //¦ Variaveis do Rodape do Modelo 2
 //+----------------------------------------------+
-nLinGetD:=0
+nLinGetD := 0
 
 //+----------------------------------------------+
 //¦ Titulo da Janela                             ¦
 //+----------------------------------------------+
-
-cTitulo:="Avaliação Física"
+cTitulo := "Avaliação Física"
 
 //+----------------------------------------------+
 //¦ Array com descricao dos campos do Cabecalho  ¦
 //+----------------------------------------------+
-
 aC:={}
 //#IFDEF WINDOWS 
     AADD(aC,{"cCliente" ,{15,10} ,"Cod. do Cliente","@!",'ExecBlock(.F.,.F.)',"SA1",}) 
@@ -109,8 +109,7 @@ aC:={}
 //+-------------------------------------------------+
 //¦ Array com descricao dos campos do Rodape        ¦
 //+-------------------------------------------------+
-
-aR:={}
+aR := {}
 
 #IFDEF WINDOWS 
     AADD(aR , {"nLinGetD" ,{120,10},"Linha na GetDados","@E 999",,,.F.})
@@ -121,32 +120,69 @@ aR:={}
 //+------------------------------------------------+
 //¦ Array com coordenadas da GetDados no modelo2   ¦
 //+------------------------------------------------+
-
 #IFDEF WINDOWS    
-    aCGD:={44,5,118,315}
-    CGD:={aSize[7],aSize[1],aSize[6],aSize[5]}
+    aCGD := {44,5,118,315}
+//  aCGD := {aSize[7],aSize[1],aSize[6],aSize[5]}
 #ELSE    
-    aCGD:={10,04,15,73}
+    aCGD := {10,04,15,73}
 #ENDIF
-
-
 
 
 //+----------------------------------------------+
 //¦ Validacoes na GetDados da Modelo 2           ¦
 //+----------------------------------------------+
+cLinhaOk := IIF(Findfunction("Md2LinOk"),"ExecBlock('Md2LinOk',.f.,.f.)",".T.")
+cTudoOk  := IIF(Findfunction("Md2TudOk"),"ExecBlock('Md2TudOk',.f.,.f.)",".T.")
 
-cLinhaOk := IIF(Findfunction("Md2LinOk"),"ExecBlock('Md2LinOk',.f.,.f.)","")
-cTudoOk  := IIF(Findfunction("Md2TudOk"),"ExecBlock('Md2TudOk',.f.,.f.)","")
 
 //+----------------------------------------------+
 //¦ Chamada da Modelo2                           ¦
 //+----------------------------------------------+
+//lRet = .t. se confirmou
+//lRet = .f. se cancelou
 
-// lRet = .t. se confirmou
-// lRet = .f. se cancelou
+lRet   := Modelo2(cTitulo,aC,aR,aCGD,nOp  ,cLinhaOk,cTudoOk,,,,,,,.T.)
+//lRet := Modelo2(cTitulo,aC,aR,aCGD,nOpcx,cLinhaOk,cTudoOk,,,,,aSize,,,.T.)
+//lRet := Modelo2(cTitulo,aC,aR,aCGD,nOpcx,cLinhaOk,cTudoOk)
 
-//lRet:=Modelo2(cTitulo,aC,aR,aCGD,nOpcx,cLinhaOk,cTudoOk)
-lRet:=Modelo2(cTitulo,aC,aR,aCGD,nOp,cLinhaOk,cTudoOk,,,,,,,.T.)
-//lRet:=Modelo2(cTitulo,aC,aR,aCGD,nOpcx,cLinhaOk,cTudoOk,,,,,aSize,,,.T.)
+_nDatm  := aScan(aHeader , {|x| x[2]=="ZZC_DATMED"})
+_nPeso  := aScan(aHeader , {|x| x[2]=="ZZC_PESO  "})
+_nIMC   := aScan(aHeader , {|x| x[2]=="ZZC_IMC   "})
+_nCOMOB := aScan(aHeader , {|x| x[2]=="ZZC_COMOB "})
+_nBRAE  := aScan(aHeader , {|x| x[2]=="ZZC_BRACOE"})
+_nBRAD  := aScan(aHeader , {|x| x[2]=="ZZC_BRACOD"})
+_nOMBR  := aScan(aHeader , {|x| x[2]=="ZZC_OMBRO "})
+_nPEIT  := aScan(aHeader , {|x| x[2]=="ZZC_PEITO "})
+_nABDM  := aScan(aHeader , {|x| x[2]=="ZZC_ABDOM "})
+_nCOXE  := aScan(aHeader , {|x| x[2]=="ZZC_COXAE "})
+_nCOXD  := aScan(aHeader , {|x| x[2]=="ZZC_COXAD "})
+_nPANE  := aScan(aHeader , {|x| x[2]=="ZZC_PANTUE"})
+_nPAND  := aScan(aHeader , {|x| x[2]=="ZZC_PANTUD"})
+
+If lRet // Gravacao. . .
+    For _l := 1 To Len(aCols)
+        If !aCols[_l,Len(aHeader)+1]
+            dbSelectArea("ZZC")
+            RecLock("ZZC",.T.)
+            ZZC->ZZC_FILIAL  := xFilial("ZZC")
+            ZZC->ZZC_MATRIC  := cCliente 
+			ZZC->ZZC_DATMED  := aCols[_l,_nDatm]
+			ZZC->ZZC_PESO    := aCols[_l,_nPeso]
+			ZZC->ZZC_IMC     := aCols[_l,_nIMC]
+			ZZC->ZZC_COMOB   := aCols[_l,_nCOMOB]
+			ZZC->ZZC_BRACOE  := aCols[_l,_nBRAE]
+			ZZC->ZZC_BRACOD  := aCols[_l,_nBRAD]
+			ZZC->ZZC_OMBRO   := aCols[_l,_nOMBR]
+			ZZC->ZZC_PEITO   := aCols[_l,_nPEIT]
+			ZZC->ZZC_ABDOM   := aCols[_l,_nABDM]
+			ZZC->ZZC_COXAE   := aCols[_l,_nCOXE]
+			ZZC->ZZC_COXAD   := aCols[_l,_nCOXD]
+			ZZC->ZZC_PANTUE  := aCols[_l,_nPANE]
+			ZZC->ZZC_PANTUD  := aCols[_l,_nPAND]
+            MsUnLock()
+        EndIf
+    Next _l
+Endif
+
+
 Return
