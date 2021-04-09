@@ -3,11 +3,11 @@
 User Function GYM004()
 
 Private  cMd2valid := ""
-Private aSize := {}
-Private aObjects := {}
-Private aPosObj :={}
-Private aInfo := {}
-Private nOp
+Private aSize      := {}
+Private aObjects   := {}
+Private aPosObj    := {}
+Private aInfo      := {}
+Private nOp        := 3 
 
 aSize := MsAdvSize()
 AAdd( aObjects, { 70, 20,  .T., .T. })
@@ -26,12 +26,12 @@ dbSelectArea("Sx3")
 dbSetOrder(1)
 
 dbSeek("ZZC")
-nUsado:=0
-aHeader:={}
+nUsado  := 0
+aHeader := {}
 
 While !Eof() .And. (x3_arquivo == "ZZC")    
     IF X3USO(x3_usado) .AND. cNivel >= x3_nivel        
-        nUsado:=nUsado+1
+        nUsado := nUsado+1
         If Findfunction("MD2VALID")
             cMd2valid := "ExecBlock('Md2valid',.f.,.f.)"
         Endif        
@@ -44,45 +44,41 @@ End
 //+-----------------------------------------------+
 //¦ Montando aCols para a GetDados                ¦
 //+-----------------------------------------------+
+aCols := Array(1,nUsado+1)
 
-aCols:=Array(1,nUsado+1)
-
-dbSelectArea("Sx3")
+dbSelectArea("SX3")
 dbSeek("ZZC")
 
-nUsado:=0
+nUsado := 0
 
 While !Eof() .And. (x3_arquivo == "ZZC")    
     IF X3USO(x3_usado) .AND. cNivel >= x3_nivel       
-    
-        nUsado:=nUsado+1        
-        
-            IF nOp == 3           
-                IF x3_tipo == "C"             
-                    aCOLS[1][nUsado] := SPACE(x3_tamanho)                
-                Elseif x3_tipo == "N"                    
-                    aCOLS[1][nUsado] := 0                
-                Elseif x3_tipo == "D"                    
-                    aCOLS[1][nUsado] := dDataBase                
-                Elseif x3_tipo == "M"                    
-                    aCOLS[1][nUsado] := ""                
-                Else                    
-                    aCOLS[1][nUsado] := .F.                
-                Endif            
-            Endif        
-        Endif   
-    
+        nUsado := nUsado+1        
+        IF nOp == 3 
+            IF     x3_tipo == "C" 
+                aCOLS[1][nUsado] := SPACE(x3_tamanho)                
+            Elseif x3_tipo == "N"                    
+                aCOLS[1][nUsado] := 0                
+            Elseif x3_tipo == "D" 
+                aCOLS[1][nUsado] := dDataBase                
+            Elseif x3_tipo == "M" 
+                aCOLS[1][nUsado] := ""                
+            Else                    
+                aCOLS[1][nUsado] := .F.                
+            Endif 
+        Endif        
+    Endif   
     dbSkip()
-End
+EndDo 
 aCOLS[1][nUsado+1] := .F.
 
 //+----------------------------------------------+
 //¦ Variaveis do Cabecalho do Modelo 2           ¦
 //+----------------------------------------------+
 
-cCliente:=Space(6)
-cLoja   :=Space(2)
-dData   :=Date()
+cCliente := Space(6)
+cLoja    := Space(2)
+dData    := Date()
 
 //+----------------------------------------------+
 //¦ Variaveis do Rodape do Modelo 2
@@ -117,9 +113,9 @@ aC:={}
 aR:={}
 
 #IFDEF WINDOWS 
-    AADD(aR,{"nLinGetD" ,{120,10},"Linha na GetDados", "@E 999",,,.F.})
+    AADD(aR , {"nLinGetD" ,{120,10},"Linha na GetDados","@E 999",,,.F.})
 #ELSE 
-   AADD(aR,{"nLinGetD" ,{19,05},"Linha na GetDados","@E 999",,,.F.})
+    AADD(aR , {"nLinGetD" ,{ 19,05},"Linha na GetDados","@E 999",,,.F.})
 #ENDIF
 
 //+------------------------------------------------+
@@ -127,10 +123,10 @@ aR:={}
 //+------------------------------------------------+
 
 #IFDEF WINDOWS    
-aCGD:={44,5,118,315}
-CGD:={aSize[7],aSize[1],aSize[6],aSize[5]}
+    aCGD:={44,5,118,315}
+    CGD:={aSize[7],aSize[1],aSize[6],aSize[5]}
 #ELSE    
-aCGD:={10,04,15,73}
+    aCGD:={10,04,15,73}
 #ENDIF
 
 
