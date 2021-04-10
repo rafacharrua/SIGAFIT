@@ -78,10 +78,12 @@ aCOLS[1][nUsado+1] := .F.
 //¦ Variaveis do Cabecalho do Modelo 2           ¦
 //+----------------------------------------------+
 
-cCliente := Space(6)
-cLoja    := Space(2)
-dData    := Date()
-
+//cCliente := Space(10)
+//cLoja    := Space(2)
+//dData    := Date()
+ cMat   := Space(10)
+ cAlu   := Space(40)
+ dData  := Date()
 //+----------------------------------------------+
 //¦ Variaveis do Rodape do Modelo 2
 //+----------------------------------------------+
@@ -97,9 +99,12 @@ cTitulo := "Avaliação Física"
 //+----------------------------------------------+
 aC:={}
 //#IFDEF WINDOWS 
-    AADD(aC,{"cCliente" ,{15,10} ,"Cod. do Cliente","@!",'ExecBlock(.F.,.F.)',"SA1",}) 
-    AADD(aC,{"cLoja"    ,{15,200},"Loja","@!",,,}) 
+    AADD(aC,{"cMat" ,{15,10} ,"Mat. do Cliente","@!",'ExecBlock(.F.,.F.)',"ZZA",})
+    AADD(aC,{"cAlu"    ,{15,200},"Aluno","@!",,,})
     AADD(aC,{"dData"    ,{27,10} ,"Data de Emissao",,,,})
+    //AADD(aC,{"cCliente" ,{15,10} ,"Cod. do Cliente","@!",'ExecBlock(.F.,.F.)',"SA1",}) 
+    //AADD(aC,{"cLoja"    ,{15,200},"Loja","@!",,,}) 
+    //AADD(aC,{"dData"    ,{27,10} ,"Data de Emissao",,,,})
 //#ELSE 
 //    AADD(aC,{"cCliente" ,{6,5} ,"Cod. do Cliente","@!",'ExecBlock("MD2VLCLI",.F.,.F.)',"SA1",}) 
 //    AADD(aC,{"cLoja"    ,{6,40},"Loja","@!",,,}) 
@@ -165,7 +170,7 @@ If lRet // Gravacao. . .
             dbSelectArea("ZZC")
             RecLock("ZZC",.T.)
             ZZC->ZZC_FILIAL  := xFilial("ZZC")
-            ZZC->ZZC_MATRIC  := cCliente 
+            ZZC->ZZC_MATRIC  := cMat 
 			ZZC->ZZC_DATMED  := aCols[_l,_nDatm]
 			ZZC->ZZC_PESO    := aCols[_l,_nPeso]
 			ZZC->ZZC_IMC     := aCols[_l,_nIMC]
@@ -183,6 +188,5 @@ If lRet // Gravacao. . .
         EndIf
     Next _l
 Endif
-
 
 Return
