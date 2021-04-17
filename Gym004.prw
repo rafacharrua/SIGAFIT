@@ -188,5 +188,4 @@ If lRet // Gravacao. . .
         EndIf
     Next _l
 Endif
-
 Return
