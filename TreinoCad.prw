@@ -1,6 +1,6 @@
 #include "rwmake.ch"        // incluido pelo assistente de conversao do AP5 IDE em 09/06/00
 
-User Function Cadtreino()        // incluido pelo assistente de conversao do AP5 IDE em 09/06/00
+User Function TreinoCad()        // incluido pelo assistente de conversao do AP5 IDE em 09/06/00
 
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //³ Declaracao de variaveis utilizadas no programa atraves da funcao    ³
@@ -45,9 +45,9 @@ aRotina   := { { "Pesquisar"    ,"AxPesqui" , 0, 1},;
     @3,1 Say cCadastro Color "B/W"
 #ENDIF
 
-dbSelectArea("ZZE")
+dbSelectArea("ZZD")
 dbSetOrder(1)
 
-mBrowse( 6,1,22,75,"ZZE")
+mBrowse( 6,1,22,75,"ZZD")
 
 Return
