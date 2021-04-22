@@ -27,7 +27,7 @@ SetPrvt("CALIASGETD,CLINOK,CTUDOK,CFIELDOK,ACPOENCHOICE,_LRET")
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
 /*/
 
-dbSelectArea("SZ1")
+dbSelectArea("ZZD")
 If EOF() .And. BOF()
     Help("",1,"ARQVAZIO")
     Return
@@ -49,7 +49,7 @@ EndCase
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //³ Cria variaveis M->????? da Enchoice                          ³
 //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-RegToMemory("SZ1",(cOpcao == "INCLUIR"))
+RegToMemory("ZZD",(cOpcao == "INCLUIR"))
 
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //³ Cria aHeader e aCols da GetDados                             ³
@@ -57,10 +57,10 @@ RegToMemory("SZ1",(cOpcao == "INCLUIR"))
 
 nUsado  := 0
 dbSelectArea("SX3")
-dbSeek("SZ2")
+dbSeek("ZZE")
 aHeader := {}
-While !Eof().And.(x3_arquivo=="SZ2")
-    If Upper(AllTrim(X3_CAMPO)) == "Z2_CODIGO"
+While !Eof().And.(x3_arquivo=="ZZE")
+    If Upper(AllTrim(X3_CAMPO)) == "ZZE_COD"
         dbSkip()
         Loop
     Endif
@@ -82,16 +82,17 @@ If cOpcao == "INCLUIR"
 	Next
 Else
 	aCols:={}
-    dbSelectArea("SZ2")
+    dbSelectArea("ZZE")
 	dbSetOrder(1)
-    dbSeek(xFilial()+M->Z1_CODIGO)
-    While !eof() .and. xFilial() == SZ2->Z2_FILIAL .And. ;
-          SZ2->Z2_CODIGO == M->Z1_CODIGO
+    dbSeek(xFilial()+M->ZZD_MAT)
+    While !eof() .and. xFilial() == ZZE->ZZE_FILIAL .And. ;
+          ZZE->ZZE_COD == M->ZZD_ZZD_MAT
 
 		AADD(aCols,Array(nUsado+1))
 		For _ni:=1 to nUsado
             If Upper(AllTrim(aHeader[_ni,10])) != "V" // Campo Real
                 aCols[Len(aCols),_ni] := FieldGet(FieldPos(aHeader[_ni,2]))
+/* 
             Else // Campo Virtual
                 cCpo := AllTrim(Upper(aHeader[_nI,2]))
                 Do Case
@@ -104,6 +105,7 @@ Else
                 OtherWise
                     aCols[Len(aCols),_ni] := CriaVar(aHeader[_ni,2])
                 EndCase
+*/         
             Endif
 		Next 
 		aCols[Len(aCols),nUsado+1]:=.F.
@@ -113,7 +115,7 @@ Else
 Endif
 
 If Len(aCols)<=0
-    _nPosItem := aScan(aHeader,{|x| AllTrim(Upper(x[2]))=="Z2_ITEM"})
+    _nPosItem := aScan(aHeader,{|x| AllTrim(Upper(x[2]))=="ZZE_COD"})
     AADD(aCols,Array(nUsado+1))
     n := 1
     For _ni:=1 to nUsado
@@ -126,13 +128,13 @@ Endif
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //³ Executa a Modelo 3                                           ³
 //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-cTitulo        := "Plano de Contas FASB - Visualizar"
-cAliasEnchoice := "SZ1"
-cAliasGetD     := "SZ2"
+cTitulo        := "Cadastro de treinos - Visualizar"
+cAliasEnchoice := "ZZD"
+cAliasGetD     := "ZZE"
 cLinOk         := "AllwaysTrue()"
 cTudOk         := "AllwaysTrue()"
 cFieldOk       := "AllwaysTrue()"
-aCpoEnchoice   := {"Z1_CODIGO"}
+aCpoEnchoice   := {"ZZD_MAT"}
 
 _lRet := Modelo3(cTitulo,cAliasEnchoice,cAliasGetD,aCpoEnchoice,cLinOk,cTudOk,nOpcE,nOpcG,cFieldOk)
 
