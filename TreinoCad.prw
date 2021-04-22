@@ -32,7 +32,7 @@ cCadastro := "Cadastro de treinos"
 
 aRotina   := { { "Pesquisar"    ,"AxPesqui" , 0, 1},;
                { "Visualizar"   ,'ExecBlock("FASBVIS",.F.,.F.)' , 0, 2},;
-               { "Incluir"      ,'ExecBlock("FASBINC",.F.,.F.)' , 0, 3},;
+               { "Incluir"      ,"U_TreinoInc", 0, 3},;
                { "Alterar"      ,'ExecBlock("FASBALT",.F.,.F.)' , 0, 4},;
                { "Excluir"      ,'ExecBlock("FASBEXC",.F.,.F.)' , 0, 5} }
 
