@@ -1,6 +1,6 @@
-#include "rwmake.ch"        // incluido pelo assistente de conversao do AP5 IDE em 09/06/00
+#include "rwmake.ch"
 
-User Function TreinoCad()        // incluido pelo assistente de conversao do AP5 IDE em 09/06/00
+User Function TreinoCad()  
 
 //ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
 //ณ Declaracao de variaveis utilizadas no programa atraves da funcao    ณ
@@ -12,33 +12,20 @@ User Function TreinoCad()        // incluido pelo assistente de conversao do AP5
 SetPrvt("CCADASTRO,AROTINA,")
 
 /*/
-ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
-ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
-ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
-ฑฑบPrograma  ณ CADFASB  บ Autor ณ Luiz Carlos Vieira บ Data ณMon  28/09/98บฑฑ
-ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
-ฑฑบDescrio ณ Cadastro de contas FASB.                                   บฑฑ
-ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
-ฑฑบUso       ณ Especกfico para ESPN Brasil.                               บฑฑ
-ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
-ฑฑบArquivos  ณ SZ1 -> Cabecalho de Contas FASB                            บฑฑ
-ฑฑบ          ณ SZ2 -> Itens de contas FASB                                บฑฑ
-ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
-ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
-฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+SIGAFIT - Gestใo de academias
+Cadastro de treinos
+Desenvolvido por Rafael Charrua
+Data 21/04/2021
 /*/
 
 cCadastro := "Cadastro de treinos"
 
 aRotina   := { { "Pesquisar"    ,"AxPesqui" , 0, 1},;
-               { "Visualizar"   ,'ExecBlock("FASBVIS",.F.,.F.)' , 0, 2},;
+               { "Visualizar"   ,"U_TreinoVis", 0, 2},;
                { "Incluir"      ,"U_TreinoInc", 0, 3},;
-               { "Alterar"      ,'ExecBlock("FASBALT",.F.,.F.)' , 0, 4},;
-               { "Excluir"      ,'ExecBlock("FASBEXC",.F.,.F.)' , 0, 5} }
+               { "Alterar"      ,"U_TreinoAlt", 0, 4},;
+               { "Excluir"      ,"U_TreinoExc", 0, 5} }
 
-//ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
-//ณ No caso do ambiente DOS, desenha a tela padrao de fundo             ณ
-//ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
 
 #IFNDEF WINDOWS
     ScreenDraw("SMT050", 3, 0, 0, 0)
