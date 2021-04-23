@@ -73,7 +73,7 @@ If cOpcao == "INCLUIR"
     aCols := {Array(nUsado+1)}
 	aCols[1,nUsado+1]:=.F.
 	For _ni:=1 to nUsado
-        aCols[1,_ni] := If(AllTrim(Upper(aHeader[_ni,2]))=="Z2_ITEM",StrZero(_nI,2),CriaVar(aHeader[_ni,2]))
+        aCols[1,_ni] := If(AllTrim(Upper(aHeader[_ni,2]))=="ZZE_CODI",StrZero(_nI,2),CriaVar(aHeader[_ni,2]))
 	Next
 Else
 	aCols:={}
@@ -173,17 +173,17 @@ nNumIt := 1
 
 For nIt := 1 To Len(aCols)
     If !aCols[nIt,_nPosDel]
-        dbSelectArea("ZZD")
+        dbSelectArea("ZZE")
         dbSetOrder(1)
-        RecLock("ZZD",.T.)
+        RecLock("ZZE",.T.)
         ZZE->ZZE_FILIAL     := xFilial()
-        ZZE->ZZE_COD        := M->ZZE_COD
-        ZZE->ZZE_TREINO     := M->ZZE_TREINO
-        ZZE->ZZE_MEMBRO     := M->ZZE_MEMBRO
-        ZZE->ZZE_GRUPO      := M->ZZE_GRUPO
-        ZZE->ZZE_EXEC       := M->ZZE_EXEC
-        ZZE->ZZE_REPET      := M->ZZE_REPET
-        ZZE->ZZE_INTESI     := M->ZZE_INTESI 
+        ZZE->ZZE_CODI       := aCols[nIt,7]
+        ZZE->ZZE_TREINO     := aCols[nIt,1]
+        ZZE->ZZE_MEMBRO     := aCols[nIt,2]
+        ZZE->ZZE_GRUPO      := aCols[nIt,3]
+        ZZE->ZZE_EXEC       := aCols[nIt,4]
+        ZZE->ZZE_REPET      := aCols[nIt,5]
+        ZZE->ZZE_INTESI     := aCols[nIt,6]
         nNumIt              := nNumIt + 1
         MsUnLock()
     Endif
