@@ -73,7 +73,8 @@ If cOpcao == "INCLUIR"
     aCols := {Array(nUsado+1)}
 	aCols[1,nUsado+1]:=.F.
 	For _ni:=1 to nUsado
-        aCols[1,_ni] := If(AllTrim(Upper(aHeader[_ni,2]))=="ZZE_CODI",StrZero(_nI,2),CriaVar(aHeader[_ni,2]))
+        aCols[1,_ni] := If(AllTrim(Upper(aHeader[_ni,2]))=="ZZE_FILIAL",StrZero(_nI,2),CriaVar(aHeader[_ni,2]))
+        //aCols[1,_ni] := If(AllTrim(Upper(aHeader[_ni,2]))=="ZZE_CODI",StrZero(_nI,2),CriaVar(aHeader[_ni,2]))
 	Next
 Else
 	aCols:={}

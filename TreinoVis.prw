@@ -1,30 +1,30 @@
 #include "rwmake.ch"        // incluido pelo assistente de conversao do AP5 IDE em 09/06/00
 
 User Function TreinoVis()        // incluido pelo assistente de conversao do AP5 IDE em 09/06/00
-
-//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-//³ Declaracao de variaveis utilizadas no programa atraves da funcao    ³
-//³ SetPrvt, que criara somente as variaveis definidas pelo usuario,    ³
-//³ identificando as variaveis publicas do sistema utilizadas no codigo ³
-//³ Incluido pelo assistente de conversao do AP5 IDE                    ³
-//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Local _ni := 0
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ?
+//?Declaracao de variaveis utilizadas no programa atraves da funcao    ?
+//?SetPrvt, que criara somente as variaveis definidas pelo usuario,    ?
+//?identificando as variaveis publicas do sistema utilizadas no codigo ?
+//?Incluido pelo assistente de conversao do AP5 IDE                    ?
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ?
 
 SetPrvt("COPCAO,NOPCE,NOPCG,NUSADO,AHEADER,ACOLS")
 SetPrvt("N,_NI,CCPO,_NPOSITEM,CTITULO,CALIASENCHOICE")
 SetPrvt("CALIASGETD,CLINOK,CTUDOK,CFIELDOK,ACPOENCHOICE,_LRET")
 
 /*/
-ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
-±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
-±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
-±±ºPrograma  ³ FASBVIS  º Autor ³ Luiz Carlos Vieira º Data ³Mon  28/09/98º±±
-±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
-±±ºDescri‡„o ³ Programa de Visualizacao do plano de contas FASB           º±±
-±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
-±±ºUso       ³ Espec¡fico para ESPN Brasil. Usado por CADFASB.PRX         º±±
-±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
-±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
-ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ?
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±?
+±± ÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±?rograma  ?FASBVIS  ?Autor ?Luiz Carlos Vieira ?Data ?on  28/09/98º±?
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±?
+±±?escri‡„o ?Programa de Visualizacao do plano de contas FASB           º±?
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±?
+±±?so       ?Espec?ico para ESPN Brasil. Usado por CADFASB.PRX         º±?
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±?
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±?
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß?
 /*/
 
 dbSelectArea("ZZD")
@@ -34,7 +34,7 @@ If EOF() .And. BOF()
 Endif
 
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-//³ Opcoes de acesso para a Modelo 3                             ³
+//?Opcoes de acesso para a Modelo 3                             ?
 //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
 cOpcao := "VISUALIZAR"
@@ -47,12 +47,12 @@ Do Case
 EndCase
 
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-//³ Cria variaveis M->????? da Enchoice                          ³
+//?Cria variaveis M->????? da Enchoice                          ?
 //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 RegToMemory("ZZD",(cOpcao == "INCLUIR"))
 
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-//³ Cria aHeader e aCols da GetDados                             ³
+//?Cria aHeader e aCols da GetDados                             ?
 //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
 nUsado  := 0
@@ -60,7 +60,7 @@ dbSelectArea("SX3")
 dbSeek("ZZE")
 aHeader := {}
 While !Eof().And.(x3_arquivo=="ZZE")
-    If Upper(AllTrim(X3_CAMPO)) == "ZZE_COD"
+    If Upper(AllTrim(X3_CAMPO)) == "ZZE_CODI"
         dbSkip()
         Loop
     Endif
@@ -83,16 +83,14 @@ If cOpcao == "INCLUIR"
 Else
 	aCols:={}
     dbSelectArea("ZZE")
-	dbSetOrder(1)
-    dbSeek(xFilial()+M->ZZD_MAT)
-    While !eof() .and. xFilial() == ZZE->ZZE_FILIAL .And. ;
-          ZZE->ZZE_COD == M->ZZD_ZZD_MAT
+	dbSetOrder(2)
+    dbSeek(xFilial("ZZE")+ZZD->ZZD_MAT)
+    While !eof() //.and. xFilial() == ZZE->ZZE_FILIAL 
 
 		AADD(aCols,Array(nUsado+1))
 		For _ni:=1 to nUsado
             If Upper(AllTrim(aHeader[_ni,10])) != "V" // Campo Real
                 aCols[Len(aCols),_ni] := FieldGet(FieldPos(aHeader[_ni,2]))
-/* 
             Else // Campo Virtual
                 cCpo := AllTrim(Upper(aHeader[_nI,2]))
                 Do Case
@@ -105,7 +103,6 @@ Else
                 OtherWise
                     aCols[Len(aCols),_ni] := CriaVar(aHeader[_ni,2])
                 EndCase
-*/         
             Endif
 		Next 
 		aCols[Len(aCols),nUsado+1]:=.F.
@@ -114,8 +111,8 @@ Else
 	End
 Endif
 
-If Len(aCols)<=0
-    _nPosItem := aScan(aHeader,{|x| AllTrim(Upper(x[2]))=="ZZE_COD"})
+If Len(aCols)>0
+    _nPosItem := aScan(aHeader,{|x| AllTrim(Upper(x[2]))=="ZZE_CODI"})
     AADD(aCols,Array(nUsado+1))
     n := 1
     For _ni:=1 to nUsado
@@ -126,7 +123,7 @@ If Len(aCols)<=0
 Endif
 
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-//³ Executa a Modelo 3                                           ³
+//?Executa a Modelo 3                                           ?
 //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 cTitulo        := "Cadastro de treinos - Visualizar"
 cAliasEnchoice := "ZZD"
