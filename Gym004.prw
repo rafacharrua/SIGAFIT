@@ -153,6 +153,7 @@ lRet   := Modelo2(cTitulo,aC,aR,aCGD,nOp  ,cLinhaOk,cTudoOk,,,,,,,.T.)
 _nDatm  := aScan(aHeader , {|x| x[2]=="ZZC_DATMED"})
 _nPeso  := aScan(aHeader , {|x| x[2]=="ZZC_PESO  "})
 _nIMC   := aScan(aHeader , {|x| x[2]=="ZZC_IMC   "})
+_nRIMC   := aScan(aHeader , {|x| x[2]=="ZZC_RIMC "})
 _nCOMOB := aScan(aHeader , {|x| x[2]=="ZZC_COMOB "})
 _nBRAE  := aScan(aHeader , {|x| x[2]=="ZZC_BRACOE"})
 _nBRAD  := aScan(aHeader , {|x| x[2]=="ZZC_BRACOD"})
@@ -174,6 +175,7 @@ If lRet // Gravacao. . .
 			ZZC->ZZC_DATMED  := aCols[_l,_nDatm]
 			ZZC->ZZC_PESO    := aCols[_l,_nPeso]
 			ZZC->ZZC_IMC     := aCols[_l,_nIMC]
+            ZZC->ZZC_RIMC    := aCols[_l,_nRIMC]
 			ZZC->ZZC_COMOB   := aCols[_l,_nCOMOB]
 			ZZC->ZZC_BRACOE  := aCols[_l,_nBRAE]
 			ZZC->ZZC_BRACOD  := aCols[_l,_nBRAD]
