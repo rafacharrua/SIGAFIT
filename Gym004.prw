@@ -205,29 +205,35 @@ If lRet // Gravacao. . .
 Endif
 Return
 
+User Function AIMC()
 
-user Function AIMC()
+Local nPosRIMC := aScan(aHeader , {|x| AllTrim(x[2])=="ZZC_RIMC"}) 
+Local nRet     := aCols[n][nPosRIMC] 
+Local cRet     := ""
 
-Local nRet := M->ZZC_IMC
     Do Case
 
-    Case nRet <=18.5
-    Alert("Abaixo do peso")
+    Case nRet = 0 
+        cRet := ""
+
+    Case nRet > 0 .And. nRet <=18.5 
+        cRet := "Abaixo do peso"
 
     Case nRet <=24.9
-    Alert("Peso normal")
+        cRet := "Peso normal"
 
     Case nRet <=29.9
-    Alert("sobrepeso")
+        cRet := "sobrepeso"
 
-        Case nRet <=34.9
-    Alert("Obesidade I")
+    Case nRet <=34.9
+        cRet := "Obesidade I"
 
-        Case nRet <=39.9
-    Alert("Obesidade Severa II")
+    Case nRet <=39.9
+        cRet := "Obesidade Severa II"
 
-        Case nRet >40
-    Alert("Obesidade Morbida III")
+    Case nRet >40
+        cRet := "Obesidade Morbida III"
+
     EndCase
 
-return nRet
+return cRet
