@@ -1,6 +1,33 @@
 #include "protheus.ch"
+#include "rwmake.ch"
 
-User Function GYM004()
+User Function GYM004()  
+
+SetPrvt("CCADASTRO,AROTINA,")
+
+
+cCadastro := "Cadastro de Avaliação física"
+
+aRotina   := { { "Pesquisar"    ,"AxPesqui" , 0, 1},;
+               { "Visualizar"   ,"U_TreinoVis", 0, 2},;
+               { "Incluir"      ,"U_GYM004I", 0, 3},;
+               { "Alterar"      ,"U_TreinoAlt", 0, 4},;
+               { "Excluir"      ,"U_TreinoExc", 0, 5} }
+
+
+#IFNDEF WINDOWS
+    ScreenDraw("SMT050", 3, 0, 0, 0)
+    @3,1 Say cCadastro Color "B/W"
+#ENDIF
+
+dbSelectArea("ZZC")
+dbSetOrder(1)
+
+mBrowse( 6,1,22,75,"ZZC")
+
+Return
+
+User Function GYM004I()
 
 Private  cMd2valid := ""
 Private aSize      := {}
@@ -29,10 +56,7 @@ nUsado  := 0
 aHeader := {}
 
 While !Eof() .And. (x3_arquivo == "ZZC")    
-//    If (AllTrim(X3_CAMPO)=="ZZC_MATRIC") 
-//        SX3->(dbSkip()) 
-//        Loop
-//    Endif
+
     If X3USO(x3_usado) .AND. cNivel >= x3_nivel 
         nUsado := nUsado+1
         If Findfunction("MD2VALID")
@@ -102,14 +126,7 @@ aC:={}
     AADD(aC,{"cMat" ,{15,10} ,"Mat. do Cliente","@!",'ExecBlock(.F.,.F.)',"ZZA",})
     AADD(aC,{"cAlu"    ,{15,200},"Aluno","@!",,,})
     AADD(aC,{"dData"    ,{27,10} ,"Data de Emissao",,,,})
-    //AADD(aC,{"cCliente" ,{15,10} ,"Cod. do Cliente","@!",'ExecBlock(.F.,.F.)',"SA1",}) 
-    //AADD(aC,{"cLoja"    ,{15,200},"Loja","@!",,,}) 
-    //AADD(aC,{"dData"    ,{27,10} ,"Data de Emissao",,,,})
-//#ELSE 
-//    AADD(aC,{"cCliente" ,{6,5} ,"Cod. do Cliente","@!",'ExecBlock("MD2VLCLI",.F.,.F.)',"SA1",}) 
-//    AADD(aC,{"cLoja"    ,{6,40},"Loja","@!",,,}) 
-//    AADD(aC,{"dData"    ,{7,5} ,"Data de Emissao",,,,})
-//#ENDIF
+
 
 //+-------------------------------------------------+
 //¦ Array com descricao dos campos do Rodape        ¦
@@ -127,7 +144,6 @@ aR := {}
 //+------------------------------------------------+
 #IFDEF WINDOWS    
     aCGD := {44,5,118,315}
-//  aCGD := {aSize[7],aSize[1],aSize[6],aSize[5]}
 #ELSE    
     aCGD := {10,04,15,73}
 #ENDIF
@@ -143,17 +159,14 @@ cTudoOk  := IIF(Findfunction("Md2TudOk"),"ExecBlock('Md2TudOk',.f.,.f.)",".T.")
 //+----------------------------------------------+
 //¦ Chamada da Modelo2                           ¦
 //+----------------------------------------------+
-//lRet = .t. se confirmou
-//lRet = .f. se cancelou
+
 
 lRet   := Modelo2(cTitulo,aC,aR,aCGD,nOp  ,cLinhaOk,cTudoOk,,,,,,,.T.)
-//lRet := Modelo2(cTitulo,aC,aR,aCGD,nOpcx,cLinhaOk,cTudoOk,,,,,aSize,,,.T.)
-//lRet := Modelo2(cTitulo,aC,aR,aCGD,nOpcx,cLinhaOk,cTudoOk)
 
 _nDatm  := aScan(aHeader , {|x| x[2]=="ZZC_DATMED"})
 _nPeso  := aScan(aHeader , {|x| x[2]=="ZZC_PESO  "})
 _nIMC   := aScan(aHeader , {|x| x[2]=="ZZC_IMC   "})
-_nRIMC   := aScan(aHeader , {|x| x[2]=="ZZC_RIMC "})
+_nRIMC   := aScan(aHeader , {|x| x[2]=="ZZC_RIMC  "})
 _nCOMOB := aScan(aHeader , {|x| x[2]=="ZZC_COMOB "})
 _nBRAE  := aScan(aHeader , {|x| x[2]=="ZZC_BRACOE"})
 _nBRAD  := aScan(aHeader , {|x| x[2]=="ZZC_BRACOD"})
@@ -191,3 +204,30 @@ If lRet // Gravacao. . .
     Next _l
 Endif
 Return
+
+
+user Function AIMC()
+
+Local nRet := M->ZZC_IMC
+    Do Case
+
+    Case nRet <=18.5
+    Alert("Abaixo do peso")
+
+    Case nRet <=24.9
+    Alert("Peso normal")
+
+    Case nRet <=29.9
+    Alert("sobrepeso")
+
+        Case nRet <=34.9
+    Alert("Obesidade I")
+
+        Case nRet <=39.9
+    Alert("Obesidade Severa II")
+
+        Case nRet >40
+    Alert("Obesidade Morbida III")
+    EndCase
+
+return nRet
