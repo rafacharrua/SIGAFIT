@@ -207,7 +207,7 @@ Return
 
 User Function AIMC()
 
-Local nPosRIMC := aScan(aHeader , {|x| AllTrim(x[2])=="ZZC_RIMC"}) 
+Local nPosRIMC := aScan(aHeader , {|x| AllTrim(x[2])=="ZZC_IMC"}) 
 Local nRet     := aCols[n][nPosRIMC] 
 Local cRet     := ""
 
